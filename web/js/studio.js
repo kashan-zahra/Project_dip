@@ -307,6 +307,35 @@ function buildControls() {
         input.name = c.name;
         label.appendChild(input);
         box.appendChild(label);
+
+        // in the Android app: tappable choice pills instead of the system dropdown
+        if (c.type !== "range" && document.documentElement.classList.contains("app")) {
+            input.classList.add("hidden");          // the hidden dropdown still holds the value
+            const chips = document.createElement("div");
+            chips.className = "choice";
+            chips.setAttribute("role", "radiogroup");
+            chips.setAttribute("aria-label", c.label);
+            c.options.forEach(o => {
+                const b = document.createElement("button");
+                b.type = "button";
+                b.textContent = o[1];
+                b.setAttribute("role", "radio");
+                const on = o[0] === input.value;
+                b.classList.toggle("on", on);
+                b.setAttribute("aria-checked", on);
+                b.onclick = () => {
+                    if (input.value === o[0]) return;
+                    input.value = o[0];
+                    chips.querySelectorAll("button").forEach(x => {
+                        x.classList.toggle("on", x === b);
+                        x.setAttribute("aria-checked", x === b);
+                    });
+                    schedule();
+                };
+                chips.appendChild(b);
+            });
+            box.appendChild(chips);
+        }
     });
     const reset = document.createElement("button");
     reset.className = "resetBtn";

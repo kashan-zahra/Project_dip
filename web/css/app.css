@@ -424,3 +424,28 @@ html.app .appstart .samples button {
     font-size: 13px;
 }
 html.app .appstart .samples img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+/* choice pills (replace dropdowns in the app) */
+html.app .choice {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+html.app .choice button {
+    border: 1px solid var(--cozy-line);
+    background: var(--cozy-bg);
+    color: var(--cozy-ink);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+html.app .choice button.on {
+    background: var(--cozy-accent-soft);
+    border-color: var(--cozy-accent);
+    color: var(--cozy-accent);
+    font-weight: 600;
+}
+html.app .choice button:active { transform: scale(0.97); }
