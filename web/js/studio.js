@@ -4,15 +4,14 @@
 const CATEGORIES = [...new Set(Object.values(TOOLS).map(t => t.group))];
 let currentCategory = CATEGORIES[0];
 let currentTool = null;      // nothing picked at the start
-let originalMat = null;      // the image the user opened (cv.Mat, RGB)
-let steps = [];              // history: [{ name, mat }], steps[0] is the original
+let originalImg = null;      // the image the user opened (see engine.js for what an image is)
+let steps = [];              // history: [{ name, img }], steps[0] is the original
 let compareOriginal = false; // Before shows: false = last kept step, true = the original photo
-let currentMat = null;       // the image we are working on now
-let referenceMat = null;     // second image (for Compare tools)
-let resultMat = null;        // last result (cv.Mat)
+let currentImg = null;       // the image we are working on now
+let referenceImg = null;     // second image (for Compare tools)
+let resultImg = null;        // last result
 let lastResult = null;       // result picture (data URL)
 let lastData = null;         // everything we computed last time
-let cv = null;               // OpenCV.js, set when it has loaded
 let viewMode = "split";      // split, before or after
 let timer = null;
 let requestId = 0;
@@ -54,7 +53,7 @@ drop.addEventListener("drop", e => {
 let waitingFile = null;      // picked before the engine finished loading
 
 async function newImage(file) {
-    if (!cv) {
+    if (!engineOn) {
         waitingFile = file;
         $("dropBig").textContent = "Got your image!";
         $("dropSub").textContent = "Still loading the image engine, it will open by itself in a moment...";
@@ -63,20 +62,20 @@ async function newImage(file) {
     $("dropBig").textContent = "Opening image...";
     if (window.onOpeningImage) window.onOpeningImage();
     await nextFrame();
-    let mat;
+    let img;
     try {
-        mat = await fileToMat(file);
+        img = await IMG.fromFile(file);
     } catch (err) {
         console.error(err);
         $("dropBig").textContent = "Drop an image here";
         toast("Could not read this image: " + (err && err.message ? err.message : err));
         return;
     }
-    steps.forEach(st => free(st.mat));
-    free(currentMat);
-    steps = [{ name: "Original", mat: mat }];
-    originalMat = mat;
-    currentMat = copyMat(mat);
+    steps.forEach(st => IMG.free(st.img));
+    IMG.free(currentImg);
+    steps = [{ name: "Original", img: img }];
+    originalImg = img;
+    currentImg = IMG.copy(img);
     currentTool = null;
     renderCrumbs();
     drop.classList.add("hidden");
@@ -87,66 +86,6 @@ async function newImage(file) {
     renderTools();
     buildControls();
     run();
-}
-
-// ============ IMAGE <-> cv.Mat (what app.py did with cv2) ============
-function free(m) { if (m && !m.isDeleted()) m.delete(); }
-
-function copyMat(m) { const o = new cv.Mat(); m.copyTo(o); return o; }
-
-// always 3-channel RGB, and never bigger than 1000 px (same as shrink() in app.py)
-function normalizeMat(m) {
-    let rgb = new cv.Mat();
-    if (m.channels() === 4) cv.cvtColor(m, rgb, cv.COLOR_RGBA2RGB);
-    else if (m.channels() === 1) cv.cvtColor(m, rgb, cv.COLOR_GRAY2RGB);
-    else m.copyTo(rgb);
-    const limit = 1000, h = rgb.rows, w = rgb.cols;
-    if (Math.max(h, w) > limit) {
-        const s = limit / Math.max(h, w), small = new cv.Mat();
-        cv.resize(rgb, small, new cv.Size(0, 0), s, s, cv.INTER_AREA);
-        rgb.delete();
-        rgb = small;
-    }
-    return rgb;
-}
-
-function loadImg(url) {
-    return new Promise((resolve, reject) => {
-        const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = reject;
-        im.src = url;
-    });
-}
-
-async function fileToMat(file) {
-    const url = URL.createObjectURL(file);
-    try {
-        const im = await loadImg(url);
-        const W = im.naturalWidth, H = im.naturalHeight;
-        if (!W || !H) throw new Error("empty image");
-        // big phone photos: shrink while drawing (same 1000 px limit as app.py)
-        const s = Math.min(1, 1000 / Math.max(W, H));
-        const c = document.createElement("canvas");
-        c.width = Math.max(1, Math.round(W * s));
-        c.height = Math.max(1, Math.round(H * s));
-        const ctx = c.getContext("2d", { willReadFrequently: true });
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = "high";
-        ctx.drawImage(im, 0, 0, c.width, c.height);
-        const rgba = cv.matFromImageData(ctx.getImageData(0, 0, c.width, c.height));
-        const m = normalizeMat(rgba);
-        rgba.delete();
-        return m;
-    } finally {
-        URL.revokeObjectURL(url);
-    }
-}
-
-const encCanvas = document.createElement("canvas");
-function encode(m) {
-    cv.imshow(encCanvas, m);
-    return encCanvas.toDataURL("image/png");
 }
 
 // ============ SAMPLE PHOTOS (free CC0 pictures in /samples) ============
@@ -167,9 +106,9 @@ document.querySelectorAll("[data-sample]").forEach(b => b.addEventListener("clic
 $("refFile").addEventListener("change", () => {
     const f = $("refFile").files[0];
     if (!f) return;
-    fileToMat(f).then(m => {
-        free(referenceMat);
-        referenceMat = m;
+    IMG.fromFile(f).then(m => {
+        IMG.free(referenceImg);
+        referenceImg = m;
         schedule();
     }).catch(() => toast("Could not read this image"));
     const thumb = $("refThumb");
@@ -350,11 +289,11 @@ function schedule() {
     timer = setTimeout(run, 200);
 }
 
-// ============ PROCESS THE IMAGE (in the browser, see processing.js) ============
+// ============ PROCESS THE IMAGE (browser or Python engine, see engine.js) ============
 const nextFrame = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
 
 async function run() {
-    if (!currentMat || !cv) return;
+    if (!currentImg || !engineOn) return;
     const myId = ++requestId;
     $("loading").classList.add("on");
     await nextFrame();                       // let "Processing..." appear first
@@ -363,29 +302,20 @@ async function run() {
     const form = {};
     $("controls").querySelectorAll("input, select").forEach(el => { form[el.name] = el.value; });
     const tool = currentTool || "none";
-    const ref = (currentTool && TOOLS[currentTool].needsRef) ? referenceMat : null;
-    const base = (compareOriginal && steps.length > 1) ? steps[0].mat : currentMat;
+    const ref = (currentTool && TOOLS[currentTool].needsRef) ? referenceImg : null;
+    const base = (compareOriginal && steps.length > 1) ? steps[0].img : currentImg;
     document.querySelector("#paneBefore .cap").textContent =
         (compareOriginal && steps.length > 1) ? "Before (original)" : (steps.length > 1 ? "Before (last step)" : "Before");
 
     try {
-        const [out, note] = DIP.runTool(currentMat, tool, form, ref);
-        free(resultMat);
-        resultMat = out;
-        show({
-            original: encode(base),
-            result: encode(out),
-            note: note,
-            size_original: `${base.cols} x ${base.rows}`,
-            size_result: `${out.cols} x ${out.rows}`,
-            hist_original: DIP.histogram(base),
-            hist_result: DIP.histogram(out),
-            stats_original: DIP.stats(base),
-            stats_result: DIP.stats(out),
-        });
+        const { result, data } = await IMG.process(currentImg, base, tool, form, ref);
+        if (myId !== requestId) { IMG.free(result); return; }   // a newer request already started
+        IMG.free(resultImg);
+        resultImg = result;
+        show(data);
     } catch (err) {
         console.error(err);
-        toast("Something went wrong with this tool: " + (err.message || err));
+        if (myId === requestId) toast("Something went wrong with this tool: " + (err.message || err));
     } finally {
         if (myId === requestId) $("loading").classList.remove("on");
     }
@@ -501,9 +431,9 @@ function renderCrumbs() {
 
 function goToStep(i) {
     if (!steps.length) return;
-    while (steps.length > i + 1) free(steps.pop().mat);
-    free(currentMat);
-    currentMat = copyMat(steps[i].mat);
+    while (steps.length > i + 1) IMG.free(steps.pop().img);
+    IMG.free(currentImg);
+    currentImg = IMG.copy(steps[i].img);
     currentTool = null;
     renderTools();
     buildControls();
@@ -513,13 +443,13 @@ function goToStep(i) {
 
 // keep the result and stack another tool on top
 $("useResult").addEventListener("click", () => {
-    if (!resultMat) return;
+    if (!resultImg) return;
     if (!currentTool) { toast("Pick a tool first, then keep its result."); return; }
-    const m = normalizeMat(resultMat);
-    steps.push({ name: TOOLS[currentTool].label, mat: copyMat(m) });
-    if (steps.length > 12) free(steps.splice(1, 1)[0].mat);     // keep memory small on phones
-    free(currentMat);
-    currentMat = m;
+    const m = IMG.keep(resultImg);
+    steps.push({ name: TOOLS[currentTool].label, img: IMG.copy(m) });
+    if (steps.length > 12) IMG.free(steps.splice(1, 1)[0].img);     // keep memory small on phones
+    IMG.free(currentImg);
+    currentImg = m;
     currentTool = null;
     renderTools();
     buildControls();

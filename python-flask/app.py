@@ -1,12 +1,25 @@
+"""Image Lab - Python / Flask version.
+
+Same user interface as the website and the Android app (the ../web folder), but every
+image is processed here in Python with OpenCV (processing.py) instead of in the browser.
+
+    pip install -r requirements.txt
+    python app.py            then open http://127.0.0.1:5000
+    (the original lab page is still at http://127.0.0.1:5000/classic)
+"""
 import base64
+import os
 
 import cv2
 import numpy as np
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, abort, jsonify, render_template, request, send_from_directory
 
 import processing as dip
 
-app = Flask(__name__)
+HERE = os.path.dirname(os.path.abspath(__file__))
+WEB = os.path.normpath(os.path.join(HERE, "..", "web"))   # the shared user interface
+
+app = Flask(__name__, static_folder=None)
 
 
 def encode(img):
@@ -26,6 +39,15 @@ def shrink(img, limit=1000):
         s = limit / max(h, w)
         img = cv2.resize(img, None, fx=s, fy=s, interpolation=cv2.INTER_AREA)
     return img
+
+
+def optional_image(name):
+    """An extra uploaded image (reference or base), or None."""
+    f = request.files.get(name)
+    if f is None:
+        return None
+    img = read_image(f)
+    return shrink(img) if img is not None else None
 
 
 def run_tool(img, tool, f, ref):
@@ -171,10 +193,32 @@ def run_tool(img, tool, f, ref):
     return img, ""
 
 
+# ---------------------------------------------------------------- pages
+
 @app.route("/")
 def index():
+    # the shared page from ../web, told to use this Python server for the processing
+    with open(os.path.join(WEB, "index.html"), encoding="utf-8") as f:
+        html = f.read()
+    html = html.replace("</head>", "    <script>window.IMAGE_LAB_SERVER = true;</script>\n</head>", 1)
+    return Response(html, mimetype="text/html")
+
+
+@app.route("/classic")
+def classic():
+    # the original lab page, kept for reference
     return render_template("index.html")
 
+
+@app.route("/<path:path>")
+def web_files(path):
+    # css, js, sample photos ... from ../web
+    if not os.path.isfile(os.path.join(WEB, path)):
+        abort(404)
+    return send_from_directory(WEB, path)
+
+
+# ---------------------------------------------------------------- processing
 
 @app.route("/process", methods=["POST"])
 def process():
@@ -187,25 +231,23 @@ def process():
         return jsonify(error="Could not read this image"), 400
     img = shrink(img)
 
-    ref = None
-    ref_file = request.files.get("reference")
-    if ref_file is not None:
-        ref = read_image(ref_file)
-        if ref is not None:
-            ref = shrink(ref)
+    ref = optional_image("reference")
+    # what the Before side shows: the photo itself, or (after Keep) the original photo
+    base = optional_image("base")
+    if base is None:
+        base = img
 
-    out, note = run_tool(img, request.form.get(
-        "tool", "none"), request.form, ref)
+    out, note = run_tool(img, request.form.get("tool", "none"), request.form, ref)
 
     return jsonify(
-        original=encode(img),
+        original=encode(base),
         result=encode(out),
         note=note,
-        size_original=f"{img.shape[1]} x {img.shape[0]}",
+        size_original=f"{base.shape[1]} x {base.shape[0]}",
         size_result=f"{out.shape[1]} x {out.shape[0]}",
-        hist_original=dip.histogram(img),
+        hist_original=dip.histogram(base),
         hist_result=dip.histogram(out),
-        stats_original=dip.stats(img),
+        stats_original=dip.stats(base),
         stats_result=dip.stats(out),
     )
 

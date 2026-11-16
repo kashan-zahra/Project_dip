@@ -1,4 +1,5 @@
-// Image Lab - start-up: draw the tool list and load OpenCV.js.
+// Image Lab - start-up: draw the tool list and start the image engine
+// (load OpenCV.js in the browser, or use the Python server in the Flask version).
 
 // ============ START ============
 renderTabs();
@@ -6,11 +7,14 @@ renderTools();
 buildControls();
 setMode(IS_APP ? "compare" : "split");
 
-// ============ LOAD OPENCV.JS (about 13 MB, cached after the first visit) ============
+// ============ START THE IMAGE ENGINE ============
 function engineReady(c) {
-    cv = c;
-    window.cv = c;
-    DIP.init(c);
+    if (c) {                     // browser engine: OpenCV.js has loaded
+        cv = c;
+        window.cv = c;
+        DIP.init(c);
+    }
+    engineOn = true;
     drop.classList.remove("wait");
     $("dropBig").textContent = IS_APP ? "Tap to open an image" : "Drop an image here";
     $("dropSub").textContent = IS_APP ? "or use the Camera button below" : "or click to choose one";
@@ -19,13 +23,15 @@ function engineReady(c) {
 }
 const loadStart = Date.now();
 const loadTicker = setInterval(() => {
-    if (cv || waitingFile) return;
+    if (engineOn || waitingFile) return;
     $("dropSub").textContent = "This takes a few seconds the first time (" +
         Math.round((Date.now() - loadStart) / 1000) + " s). You can already tap to pick an image.";
 }, 1000);
 window.addEventListener("error", e => toast("Error: " + (e.message || "unknown")));
 window.addEventListener("unhandledrejection", e => toast("Error: " + (e.reason && e.reason.message || e.reason)));
 (function loadEngine() {
+    if (SERVER_MODE) { engineReady(null); return; }      // Python does the work, no OpenCV.js needed
+    // OpenCV.js is about 13 MB, cached by the browser after the first visit
     const s = document.createElement("script");
     s.src = "vendor/opencv.js";
     s.async = true;

@@ -5,7 +5,7 @@
 **Learn digital image processing by playing with your own photos.**
 
 35 OpenCV tools, each explained in plain words, with the theory, the formula and the real Python code,
-running live on your picture. Available as a website, an Android app and the original Python/Flask lab app.
+running live on your picture. Available as a website, an Android app and a Python/Flask app, all with the same interface.
 
 [**Try the website**](https://digitalimageprocessingapp.netlify.app) ·
 [**Download the Android app**](https://github.com/kashan-zahra/Project_dip/releases/latest) ·
@@ -25,7 +25,8 @@ run it again, open the output. Image Lab puts all of them in one place, so you c
 an algorithm does while you move a slider, and then read **why** it does that.
 
 It started as a Flask app for the lab, then I turned the same algorithms into a website that
-runs entirely in the browser and an Android app that works offline.
+runs entirely in the browser and an Android app that works offline. All three versions now share
+one interface; only the engine underneath changes.
 
 ## Features
 
@@ -46,6 +47,11 @@ runs entirely in the browser and an Android app that works offline.
 <div align="center">
 <img src="docs/screenshots/app-overview.png" alt="Android app: start screen, tool groups, a tool with Cancel and Keep, and the Learn more page" width="900">
 <br><sub>Android app: start screen → pick a group → adjust one tool → Learn more</sub>
+</div>
+
+<div align="center">
+<img src="docs/screenshots/flask-python.png" alt="The Flask version running K-Means in Python on a photo of a coffee cup" width="900">
+<br><sub>The Python/Flask version: same interface, the processing runs in processing.py</sub>
 </div>
 
 <table>
@@ -77,18 +83,23 @@ runs entirely in the browser and an Android app that works offline.
 ## How it works
 
 ```
-python-flask/processing.py   the original lab algorithms (Python + OpenCV + NumPy)
-          │
-          │  ported line by line, checked pixel by pixel (see tests/)
-          ▼
-web/js/processing.js         the same algorithms in JavaScript with OpenCV.js (WebAssembly)
-          │
-          ├──► website   (static files, hosted on Netlify, runs in the browser)
-          └──► Android   (a WebView that loads the same web/ folder from the app's assets)
+                         web/  (one shared interface: index.html, css/, js/)
+                                         │
+                                 js/engine.js picks the engine
+                    ┌────────────────────┴─────────────────────┐
+             Browser engine                               Python engine
+   web/js/processing.js (OpenCV.js, WebAssembly)   python-flask/app.py + processing.py (OpenCV)
+                    │                                          │
+        ├──► website (Netlify, runs in the browser)    └──► Flask version: every image is
+        └──► Android app (WebView, works offline)          sent to /process and handled in Python
 ```
 
-- **One codebase, three versions.** The website and the Android app share the exact same `web/` folder;
-  the Android project points its assets at it, so a change to the web code updates both.
+- **One interface, three versions.** The website, the Android app and the Flask app all use the same
+  `web/` folder. The Android project points its assets at it, and Flask serves it and tells it to use
+  the Python engine (`window.IMAGE_LAB_SERVER`). A change to the interface updates all three.
+- **Two engines behind one small API.** [`js/engine.js`](web/js/engine.js) gives the page the same
+  functions (open, process, keep, copy) whether the pixels are processed by OpenCV.js in the browser
+  or by `processing.py` on the Python server.
 - **No server needed.** The Flask version sends every image to Python. The web version runs
   OpenCV compiled to WebAssembly, so it can be hosted for free as static files and works offline in the app.
 - **Same results as Python.** [`tests/`](tests/) runs 47 tool settings through both versions and compares
@@ -101,13 +112,15 @@ web/js/processing.js         the same algorithms in JavaScript with OpenCV.js (W
 ## Project structure
 
 ```
-python-flask/        the original lab app (Flask + OpenCV)
-  app.py             web server and run_tool()
-  processing.py      all the image-processing functions
+python-flask/        the Python version (Flask + OpenCV)
+  app.py             serves the shared web/ interface, /process runs the tools in Python
+  processing.py      all the image-processing functions (the original lab code)
+  templates/         the original lab page, still at /classic
 web/                 website + the Android app's content
   index.html
   css/style.css      website styles
   css/app.css        Android app layout
+  js/engine.js       the two image engines: browser (OpenCV.js) and Python (Flask)
   js/processing.js   the algorithms (OpenCV.js port of processing.py)
   js/tools.js        tool list, simple names and help text
   js/studio.js       opening images, running tools, history, Lab Data, pixel inspector
@@ -124,13 +137,16 @@ docs/screenshots/
 
 ## Run it yourself
 
-**Python / Flask (the original lab version)**
+**Python / Flask (the image processing runs in Python)**
 
 ```bash
 cd python-flask
 pip install -r requirements.txt
 python app.py              # then open http://127.0.0.1:5000
 ```
+
+It has every feature of the website, with the header saying "running on Python". The original
+lab page is still available at http://127.0.0.1:5000/classic.
 
 **Website**
 

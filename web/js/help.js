@@ -34,7 +34,7 @@ function openLearn(key) {
     $("lFormula").textContent = L.formula;
     $("lUses").textContent = L.uses;
     $("lCode").innerHTML = highlightPython(L.code);
-    const hasImg = !!currentMat;
+    const hasImg = !!currentImg;
     $("lThumbs").classList.toggle("hidden", !hasImg);
     $("lNone").classList.toggle("hidden", hasImg);
     if (hasImg) {

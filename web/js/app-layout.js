@@ -43,7 +43,7 @@ if (IS_APP) {
     window.onOpeningImage = () => { $("sStatus").textContent = "Opening your photo..."; };
     const statusTick = setInterval(() => {
         if (root.classList.contains("has-img")) return;
-        if (!cv) $("sStatus").textContent = waitingFile
+        if (!engineOn) $("sStatus").textContent = waitingFile
             ? "Got your photo! It opens as soon as the tools are ready..."
             : "Getting the tools ready... you can already pick a photo.";
         else if ($("sStatus").textContent.startsWith("Getting")) $("sStatus").textContent = "";
@@ -231,5 +231,5 @@ if (IS_APP) {
 
     // new photo -> start at the groups row
     const origNew = newImage;
-    newImage = async file => { await origNew(file); if (cv) { dockMode = "groups"; renderDock(); } };
+    newImage = async file => { await origNew(file); if (engineOn) { dockMode = "groups"; renderDock(); } };
 }
