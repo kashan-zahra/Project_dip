@@ -1,8 +1,8 @@
 @echo off
 rem ============================================================
-rem  Image Lab - one-time setup (double-click this file)
-rem  Creates the Python virtual environment in .\venv and
-rem  installs everything the Flask version needs.
+rem  Image Lab (Python / Flask) - one-time setup
+rem  Creates the virtual environment in this folder (.\venv)
+rem  and installs everything from requirements.txt.
 rem ============================================================
 cd /d "%~dp0"
 
@@ -37,7 +37,7 @@ if errorlevel 1 (
 :install
 echo Installing packages (first time: a few minutes)...
 "venv\Scripts\python.exe" -m pip install --upgrade pip
-"venv\Scripts\python.exe" -m pip install -r python-flask\requirements.txt
+"venv\Scripts\python.exe" -m pip install -r requirements.txt
 if errorlevel 1 (
     echo Something went wrong while installing. Check your internet connection and run this again.
     pause
@@ -46,8 +46,7 @@ if errorlevel 1 (
 
 echo.
 echo ============================================================
-echo  Done! Now double-click run-flask.bat (Python version)
-echo  or run-website.bat (website version).
-echo  In VS Code: open this folder and press F5.
+echo  Done! Start the app with run.bat, or in VS Code open
+echo  app.py and press the Run button.
 echo ============================================================
 pause

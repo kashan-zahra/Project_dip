@@ -8,7 +8,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/python-flask/app.py",
             "cwd": "${workspaceFolder}/python-flask",
-            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "python": "${workspaceFolder}\\python-flask\\venv\\Scripts\\python.exe",
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -19,7 +19,7 @@
             "module": "http.server",
             "args": ["8000"],
             "cwd": "${workspaceFolder}/web",
-            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "python": "${workspaceFolder}\\python-flask\\venv\\Scripts\\python.exe",
             "console": "integratedTerminal"
         },
         {
@@ -27,7 +27,7 @@
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/tests/make_reference.py",
-            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "python": "${workspaceFolder}\\python-flask\\venv\\Scripts\\python.exe",
             "console": "integratedTerminal"
         }
     ]
