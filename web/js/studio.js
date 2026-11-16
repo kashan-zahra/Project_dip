@@ -308,8 +308,8 @@ function buildControls() {
         label.appendChild(input);
         box.appendChild(label);
 
-        // in the Android app: tappable choice pills instead of the system dropdown
-        if (c.type !== "range" && document.documentElement.classList.contains("app")) {
+        // tappable choice pills instead of a dropdown (website and app)
+        if (c.type !== "range") {
             input.classList.add("hidden");          // the hidden dropdown still holds the value
             const chips = document.createElement("div");
             chips.className = "choice";
