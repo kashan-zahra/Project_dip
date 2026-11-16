@@ -1,0 +1,12 @@
+[["brightness_contrast",{"alpha":"1.7","beta":"-20"}],["gamma",{"gamma":"0.4"}],["negative",{}],["stretch",{}],["equalize",{}],["clahe",{"clip":"3","tile":"6"}],
+["crop",{"x":"25","y":"25","w":"50","h":"50"}],["resize",{"percent":"70","interp":"cubic"}],["resize",{"percent":"130","interp":"nearest"}],["rotate",{"mode":"cw"}],["flip",{"mode":"both"}],
+["mean",{"size":"5"}],["gaussian",{"size":"7"}],["median",{"size":"5"}],["bilateral",{"sigma":"75"}],
+["sobel",{}],["prewitt",{}],["roberts",{}],["canny",{"low":"100","high":"200"}],
+["hsi_component",{"which":"h"}],["hsi_component",{"which":"s"}],["hsi_component",{"which":"i"}],["hsi_roundtrip",{}],
+["colorspace",{"space":"hsv","channel":"0"}],["colorspace",{"space":"lab","channel":"2"}],["colorspace",{"space":"ycrcb","channel":"3"}],["colorspace",{"space":"gray","channel":"0"}],["channel",{"which":"r"}],["channel",{"which":"b"}],
+["sample",{"size":"32"}],["quantize",{"bits":"3"}],["components",{"thresh":"128","connectivity":"8"}],
+["match",{}],["compare",{"tol":"5"}],
+["log",{"c":"1"}],["bitplane",{"bit":"6"}],["laplacian",{}],
+["threshold",{"mode":"otsu"}],["threshold",{"mode":"global","t":"100"}],["threshold",{"mode":"mean"}],["threshold",{"mode":"gaussian"}],
+["kmeans",{"k":"3"}],["morph",{"op":"erode","size":"5"}],["morph",{"op":"close","size":"5"}],
+["fft",{"mode":"spectrum"}],["fft",{"mode":"low","radius":"30"}],["fft",{"mode":"high","radius":"30"}]]

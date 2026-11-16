@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Lab</title>
+    <script>
+        // Android app (or ?app=1 for testing): use the phone-app layout
+        if (window.AndroidBridge || /[?&]app=1/.test(location.search)) {
+            document.documentElement.classList.add("app");
+            document.querySelector('meta[name="viewport"]').setAttribute("content",
+                "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+        }
+    </script>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%229%22 fill=%22none%22 stroke=%22%232563eb%22 stroke-width=%224%22/%3E%3Ccircle cx=%2212%22 cy=%2212%22 r=%224%22 fill=%22%232563eb%22/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/app.css">
+
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="dot"></div>Image Lab <small>Digital Image Processing</small>
+        </div>
+        <button class="helpBtn" id="helpBtn" title="How to use Image Lab">? How to use</button>
+        <a class="btn main web-only" id="getApp" href="https://github.com/kashan-zahra/Project_dip/releases/latest/download/ImageLab.apk"
+            title="Install Image Lab on your Android phone">Get the Android app</a>
+        <nav>
+            <button id="navStudio" class="active">Studio</button>
+            <button id="navData">Lab Data</button>
+        </nav>
+    </header>
+
+    <!-- ======================= PAGE 1: STUDIO ======================= -->
+    <div id="viewStudio" class="layout">
+
+        <aside>
+            <div class="card">
+                <p class="title">Tools</p>
+                <div class="tabs" id="tabs"></div>
+                <div class="toolgrid" id="toolList"></div>
+            </div>
+
+            <!-- only visible for tools that need a second image -->
+            <div class="card hidden" id="refCard">
+                <p class="title">Reference image</p>
+                <div class="hint">This tool compares your image with a second image. Choose it here:</div>
+                <input type="file" id="refFile" accept="image/*">
+                <img id="refThumb" class="thumb hidden" alt="Reference image">
+            </div>
+
+            <div class="card">
+                <p class="title">Settings</p>
+                <div class="about hidden" id="about"></div>
+                <div id="controls">
+                    <div class="hint">Pick a tool to see what it does and its settings.</div>
+                </div>
+            </div>
+        </aside>
+
+        <section>
+            <div class="toolbar hidden" id="toolbar">
+                <div class="seg" id="seg">
+                    <button data-mode="compare" class="app-only">Compare</button>
+                    <button data-mode="split" class="active web-only">Split</button>
+                    <button data-mode="before">Before</button>
+                    <button data-mode="after">After</button>
+                </div>
+                <div class="actions">
+                    <button class="btn" id="toggleInspect">Pixel Inspector: Off</button>
+                    <button class="btn" id="newImage">New image</button>
+                    <button class="btn" id="undoBtn" title="Go back one step">&#8630; Undo</button>
+                    <button class="btn" id="startOver" title="Go back to the photo you opened">Start over</button>
+                    <button class="btn" id="useResult" title="Keep this effect and add another tool on top">&#10003; Keep &amp; add another tool</button>
+                    <a class="btn main" id="download" download="result.png">Save picture</a>
+                </div>
+            </div>
+
+            <div class="crumbs hidden" id="crumbs"></div>
+            <div class="stage">
+                <div class="dropzone wait" id="drop">
+                    <div class="big" id="dropBig">Loading image engine...</div>
+                    <span id="dropSub">This takes a few seconds the first time.</span>
+                    <div class="samples">No photo handy? Try a sample:
+                        <button data-sample="cat">&#128049; Cat</button>
+                        <button data-sample="coffee">&#9749; Coffee</button>
+                    </div>
+                </div>
+
+                <div class="views split hidden" id="views">
+                    <div class="pane" id="paneBefore">
+                        <div class="cap">Before</div>
+                        <img id="imgOriginal" alt="Original image">
+                        <div class="meta" id="sizeOriginal"></div>
+                    </div>
+                    <div class="divider"><span>&#8596;</span></div>
+                    <div class="pane" id="paneAfter">
+                        <div class="cap" id="afterCap">After</div>
+                        <img id="imgResult" alt="Result image">
+                        <div class="meta" id="sizeResult"></div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">Processing...</div>
+            </div>
+            <input type="file" id="file" accept="image/*" class="hidden">
+            <input type="file" id="camFile" accept="image/*" capture="environment" class="hidden">
+
+            <div class="card inspector hidden" id="inspector">
+                <p class="title">Pixel Inspector</p>
+                <div class="readout" id="pixReadout">Move your mouse (or drag your finger) over the Before or After image. An image is just a
+                    grid of numbers, and this shows the numbers under your mouse (gray level, 0 = black, 255 = white).
+                </div>
+                <table class="pixgrid" id="pixGrid"></table>
+            </div>
+
+            <div class="note hidden" id="noteCard"><b id="noteLabel">What happened:</b> <span id="noteText"></span></div>
+            <div class="geeklink hidden" id="geekLink">Want the numbers? <a id="goData">Open Lab Data</a> for histograms
+                and contrast measurements.</div>
+        </section>
+
+    </div>
+
+    <!-- ======================= PAGE 2: LAB DATA ======================= -->
+    <div id="viewData" class="data hidden">
+        <h2>Lab Data</h2>
+        <div class="sub" id="dataSub">Open an image in the Studio first, then come back here.</div>
+
+        <div id="dataBody" class="hidden">
+
+            <div class="card">
+                <div class="facts" id="facts"></div>
+            </div>
+
+            <div class="card">
+                <h4>Histogram</h4>
+                <div class="why">A histogram counts the pixels at each gray level, from 0 (black) on the left to 255
+                    (white) on the right. Tall bars on the left mean a dark image. Bars bunched together mean low
+                    contrast. Compare the two charts to see what the tool did to the pixel values.</div>
+                <div class="two">
+                    <div><canvas id="histOriginal"></canvas>
+                        <div class="cap2">Original</div>
+                    </div>
+                    <div><canvas id="histResult"></canvas>
+                        <div class="cap2">Result</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Image numbers</h4>
+                <div class="why">All values are measured on the gray version of the image. Simple contrast is max minus
+                    min. Michelson contrast is (max - min) / (max + min). RMS contrast is how far the pixels are spread
+                    around the mean.</div>
+                <table id="statsTable"></table>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- ======================= ANDROID APP PARTS (hidden on the website) ======================= -->
+    <div class="apptop app-only" id="appTop">
+        <button class="tbtn" id="tBack" aria-label="Back to photo"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <button class="tbtn" id="tUndo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg></button>
+        <div class="ttl"><div class="dot"></div><span id="tTitle">Image Lab</span></div>
+        <button class="tbtn" id="tData" aria-label="Lab Data: numbers and charts"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></button>
+        <button class="tbtn" id="tHelp" aria-label="How to use"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6"/><path d="M12 17h.01"/></svg></button>
+        <button class="tbtn save" id="tSave" aria-label="Save picture"><svg viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></button>
+    </div>
+    <div class="appstart app-only" id="appStart">
+        <svg class="art" viewBox="0 0 150 120" aria-hidden="true">
+            <rect x="18" y="22" width="96" height="76" rx="16" fill="#e8edff" transform="rotate(-7 66 60)"/>
+            <rect x="34" y="18" width="98" height="78" rx="16" fill="#ffffff" stroke="#e3ddd2" stroke-width="2"/>
+            <circle cx="62" cy="44" r="9" fill="#ffd36e"/>
+            <path d="M42 86l24-26 16 16 12-12 30 22z" fill="#9db4ff"/>
+            <path d="M118 12l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#ffb86b"/>
+            <path d="M22 98l2 4 4 2-4 2-2 4-2-4-4-2 4-2z" fill="#3b5bdb"/>
+        </svg>
+        <h2>Let's play with a photo</h2>
+        <p>Pick a picture, try fun image-processing tools on it and see exactly what changes.</p>
+        <button class="bigbtn primary" id="sGallery"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>Choose from gallery</button>
+        <button class="bigbtn ghost" id="sCamera"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>Take a photo</button>
+        <div class="samples">or try a sample:
+            <button data-sample="cat"><img src="samples/cat.jpg" alt="">Cat</button>
+            <button data-sample="coffee"><img src="samples/coffee.jpg" alt="">Coffee</button>
+        </div>
+        <div class="status" id="sStatus"></div>
+        <button class="linkbtn" id="sHow">How does it work?</button>
+    </div>
+    <button class="lensbtn app-only" id="lensBtn" aria-label="Inspect pixels"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.3-4.3"/></svg></button>
+    <div class="dock app-only" id="dock"></div>
+
+    <!-- ======================= HOW TO USE (first visit + "?" button) ======================= -->
+    <div class="guide hidden" id="guide" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+        <div class="gbox">
+            <h3 id="guideTitle">How to use Image Lab</h3>
+            <div class="gsub">Try image-processing tools on any photo and see what changes. Nothing is changed on your device until you save.</div>
+            <div class="flow">
+                <div class="fstep"><div class="num">1</div><div><b>Open a photo</b>
+                    <span class="web-only">Drop a picture on the big box, or click it to choose one.</span>
+                    <span class="app-only">Tap <b style="display:inline">Choose from gallery</b> or <b style="display:inline">Take a photo</b>.</span></div></div>
+                <div class="farrow">&#8595;</div>
+                <div class="fstep"><div class="num">2</div><div><b>Pick a tool</b>
+                    <span>First choose a group (Enhance, Edges, Colour...), then a tool. Each tool has a simple description under its name.</span></div></div>
+                <div class="farrow">&#8595;</div>
+                <div class="fstep"><div class="num">3</div><div><b>Adjust and compare</b>
+                    <span class="web-only">Move the sliders. Before and After are shown side by side.</span>
+                    <span class="app-only">Move the sliders. Drag across the picture to slide between Before and After. Don't like it? Tap <b style="display:inline">Cancel</b>.</span></div></div>
+                <div class="farrow">&#8595;</div>
+                <div class="fsplit">
+                    <div class="fstep loop"><div class="num">&#8634;</div><div><b>Keep &amp; add more</b>
+                        <span>Keeps this effect, then go back to step 2 and stack another tool on top.</span></div></div>
+                    <div class="fstep save"><div class="num">&#10003;</div><div><b>Save</b>
+                        <span>Saves the After picture<span class="app-only"> to your gallery</span>.</span></div></div>
+                </div>
+            </div>
+            <ul class="gextra">
+                <li><b>Made a mistake?</b> Use <b>Undo</b><span class="app-only"> (the curved arrow, top left)</span>, or tap any step in the Steps bar (Original &#8594; ...) to go back to it.</li>
+                <li><b>Lab Data</b><span class="app-only"> (the chart icon at the top)</span> shows the numbers: a histogram and contrast values for Before and After.</li>
+                <li><b>Inspect</b><span class="app-only"> (the magnifier on the picture)</span> lets you see the actual pixel numbers under your <span class="web-only">mouse</span><span class="app-only">finger</span>.</li>
+                <li class="app-only"><b>Save</b> is the blue button at the top right.</li>
+                <li>Every tool shows a short explanation. Tap <b>Learn more</b> for the theory, the formula and the real Python code, with the tool working live on your photo.</li>
+                <li>After keeping a few effects, use <b>Compare with: Original</b> in the Steps bar to see all changes against the photo you started with.</li>
+            </ul>
+            <button class="btn main gok" id="guideOk">Got it, let's start</button>
+        </div>
+    </div>
+
+
+    <!-- ======================= LEARN MORE (theory + code + live preview) ======================= -->
+    <div class="guide learn hidden" id="learn" role="dialog" aria-modal="true" aria-labelledby="learnTitle">
+        <div class="gbox">
+            <div class="lhead">
+                <h3 id="learnTitle"></h3>
+                <button class="lclose" id="learnClose" aria-label="Close">&#10005;</button>
+            </div>
+            <div class="lbody">
+                <h4>What it is</h4>
+                <p id="lWhat"></p>
+                <h4>How it works</h4>
+                <p id="lHow"></p>
+                <h4>The formula</h4>
+                <div class="formula" id="lFormula"></div>
+                <h4>Try it live on your photo</h4>
+                <div class="live" id="lLive">
+                    <div class="thumbs" id="lThumbs">
+                        <div><img id="lBefore" alt="Before">Before</div>
+                        <div><img id="lAfter" alt="After">After</div>
+                    </div>
+                    <div class="lnone hidden" id="lNone">Open a photo first, then come back here to see this tool change it live.</div>
+                    <div id="lControls"></div>
+                </div>
+                <h4>The Python code (OpenCV, from processing.py)</h4>
+                <div class="codewrap">
+                    <pre><code id="lCode"></code></pre>
+                    <button class="copy" id="lCopy">Copy</button>
+                </div>
+                <h4>Where it's used</h4>
+                <p id="lUses"></p>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="lens" width="168" height="168"></canvas>
+
+    <div id="toast"></div>
+
+    <script src="js/processing.js"></script>
+    <script src="js/learn-data.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/studio.js"></script>
+    <script src="js/help.js"></script>
+    <script src="js/app-layout.js"></script>
+    <script src="js/start.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,426 @@
+/* Image Lab - Android app layout. Only active when <html> has class "app"
+   (set automatically inside the Android app, or with ?app=1 in a browser). */
+
+/* =====================================================================
+   ANDROID APP LAYOUT (only when html has class "app")
+   One thing at a time: start screen -> groups -> tools -> one tool
+   ===================================================================== */
+.app-only { display: none !important; }
+html.app .app-only { display: revert !important; }
+html.app .web-only { display: none !important; }
+
+html.app {
+    --cozy-bg: #f7f4ef;
+    --cozy-card: #ffffff;
+    --cozy-ink: #1f2430;
+    --cozy-soft: #6b6f7b;
+    --cozy-line: #ebe6dd;
+    --cozy-accent: #3b5bdb;
+    --cozy-accent-soft: #e8edff;
+}
+
+html.app, html.app body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.app body {
+    display: flex;
+    flex-direction: column;
+    background: var(--cozy-bg);
+    color: var(--cozy-ink);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html.app header { display: none !important; }
+html.app button { font-family: inherit; }
+
+/* ---------- top bar ---------- */
+.apptop {
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 8px 8px 10px;
+    background: var(--cozy-bg);
+}
+html.app .apptop { display: flex !important; }
+.apptop .ttl {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    min-width: 0;
+}
+.apptop .ttl .dot { width: 20px; height: 20px; border-width: 4px; flex: 0 0 auto; }
+.apptop .ttl span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tbtn {
+    width: 42px;
+    height: 42px;
+    border: 0;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--cozy-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 0 0 auto;
+}
+.tbtn svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.tbtn:active { background: rgba(0, 0, 0, 0.06); }
+.tbtn:disabled { opacity: 0.3; }
+.tbtn.save { background: var(--cozy-accent); color: #fff; margin-left: 4px; }
+.tbtn.on { background: var(--cozy-accent-soft); color: var(--cozy-accent); }
+html.app.on-data #tUndo, html.app.on-data #tSave, html.app.on-data #tData { display: none; }
+html.app:not(.on-data) #tBack { display: none !important; }
+html.app:not(.has-img) #tUndo, html.app:not(.has-img) #tSave, html.app:not(.has-img) #tData { visibility: hidden; }
+
+/* ---------- studio ---------- */
+html.app #viewStudio {
+    flex: 1;
+    min-height: 0;
+    display: flex !important;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    gap: 0;
+}
+html.app #viewStudio.hidden { display: none !important; }
+html.app #viewStudio > aside,
+html.app #viewStudio > section { display: none; }
+
+/* start screen (no photo yet) */
+.appstart {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px 22px 40px;
+    text-align: center;
+}
+html.app .appstart { display: flex !important; }
+html.app.has-img .appstart { display: none !important; }
+.appstart .art { width: 150px; height: 120px; }
+.appstart h2 { margin: 6px 0 0; font-size: 22px; }
+.appstart p { margin: 0 0 8px; color: var(--cozy-soft); font-size: 14px; line-height: 1.5; max-width: 300px; }
+.bigbtn {
+    width: 100%;
+    max-width: 340px;
+    border: 0;
+    border-radius: 18px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.bigbtn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.bigbtn.primary { background: var(--cozy-accent); color: #fff; box-shadow: 0 6px 18px rgba(59, 91, 219, 0.3); }
+.bigbtn.ghost { background: var(--cozy-card); color: var(--cozy-ink); border: 1px solid var(--cozy-line); }
+.bigbtn:active { transform: scale(0.98); }
+.appstart .status { font-size: 12.5px; color: var(--cozy-soft); min-height: 18px; }
+.linkbtn { border: 0; background: none; color: var(--cozy-accent); font-size: 14px; cursor: pointer; padding: 6px; }
+
+/* picture */
+html.app .app-stage {
+    flex: 1;
+    min-height: 140px;
+    position: relative;
+    margin: 0 10px;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #15171d;
+}
+html.app:not(.has-img) .app-stage,
+html.app:not(.has-img) .dock,
+html.app:not(.has-img) #crumbs { display: none !important; }
+
+html.app .stage {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 8px;
+    min-height: 0;
+    margin: 0;
+}
+html.app .dropzone { display: none !important; }
+html.app .loading { background: rgba(21, 23, 29, 0.55); color: #fff; border-radius: 0; }
+html.app #views { position: relative; height: 100%; display: block; }
+html.app .pane { position: absolute; inset: 0; }
+html.app .pane img {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;
+    box-shadow: none;
+    border-radius: 0;
+}
+html.app .pane .meta { display: none; }
+html.app .pane .cap {
+    position: absolute;
+    top: 4px;
+    z-index: 2;
+    margin: 0;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(21, 23, 29, 0.7);
+    color: #e5e7eb;
+    font-size: 10px;
+    letter-spacing: 0.6px;
+    max-width: 46%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+html.app #paneBefore .cap { left: 4px; }
+html.app #paneAfter .cap { right: 4px; }
+
+html.app #views.compare { touch-action: none; }
+html.app #views.compare .pane img { pointer-events: none; }
+html.app #views.compare #paneAfter img { clip-path: inset(0 0 0 var(--cut, 50%)); }
+html.app #views.compare #paneAfter { pointer-events: none; }
+
+.divider { display: none; position: absolute; top: 0; bottom: 0; left: var(--cut, 50%); width: 0; z-index: 3; pointer-events: none; }
+.divider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: #fff; box-shadow: 0 0 4px rgba(0, 0, 0, 0.6); }
+.divider span {
+    position: absolute; top: 50%; left: -17px; width: 34px; height: 34px; margin-top: -17px;
+    border-radius: 50%; background: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    display: flex; align-items: center; justify-content: center; color: var(--cozy-accent, #2563eb); font-size: 14px; font-weight: 700;
+}
+html.app #views.compare .divider { display: block; }
+
+/* Compare / Before / After + magnifier, floating on the picture */
+html.app .seg {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+    background: rgba(21, 23, 29, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+}
+html.app .seg button { color: #d1d5db; padding: 6px 13px; font-size: 12px; }
+html.app .seg button.active { background: #fff; color: var(--cozy-ink); border-radius: 999px; }
+.lensbtn {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 4;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(21, 23, 29, 0.72);
+    color: #e5e7eb;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+html.app .lensbtn { display: flex !important; }
+.lensbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.lensbtn.on { background: #fff; color: var(--cozy-accent); }
+
+/* pixel readout floats at the top of the picture */
+html.app #inspector {
+    position: absolute;
+    top: 34px;
+    left: 10px;
+    right: 10px;
+    z-index: 5;
+    margin: 0;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+}
+html.app #inspector .title, html.app #inspector .pixgrid { display: none; }
+html.app #inspector .readout { margin: 0; font-size: 11.5px; }
+
+/* steps bar */
+html.app .crumbs {
+    flex: 0 0 auto;
+    margin: 0 10px 6px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+html.app .crumbs::-webkit-scrollbar { display: none; }
+html.app .crumbs.single { display: none !important; }
+html.app .crumbs .trying { display: none; }
+html.app .crumbs button { background: var(--cozy-card); border-color: var(--cozy-line); }
+html.app .crumbs button.cur { background: var(--cozy-ink); border-color: var(--cozy-ink); }
+
+/* ---------- the dock: ONE thing at a time ---------- */
+.dock {
+    flex: 0 0 auto;
+    flex-direction: column;
+    margin: 10px 0 0;
+    background: var(--cozy-card);
+    border-top-left-radius: 26px;
+    border-top-right-radius: 26px;
+    box-shadow: 0 -6px 24px rgba(31, 36, 48, 0.08);
+    padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+    max-height: 52%;
+    min-height: 0;
+}
+html.app .dock { display: flex !important; }
+.dock .dhead {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 16px 10px;
+    font-size: 13px;
+    color: var(--cozy-soft);
+    flex: 0 0 auto;
+}
+.dock .dhead b { color: var(--cozy-ink); font-size: 15px; }
+.dock .backbtn {
+    border: 0;
+    background: var(--cozy-bg);
+    color: var(--cozy-ink);
+    border-radius: 12px;
+    height: 32px;
+    padding: 0 12px 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+.dock .backbtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.drow {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 2px 16px 4px;
+    scrollbar-width: none;
+    flex: 0 0 auto;
+}
+.drow::-webkit-scrollbar { display: none; }
+.gtile {
+    flex: 0 0 74px;
+    border: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 11.5px;
+    color: var(--cozy-ink);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1.2;
+}
+.gtile i {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.gtile i svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.gtile:active i { transform: scale(0.94); }
+.ttile {
+    flex: 0 0 auto;
+    min-width: 120px;
+    max-width: 170px;
+    border: 1px solid var(--cozy-line);
+    background: var(--cozy-bg);
+    border-radius: 16px;
+    padding: 11px 13px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--cozy-ink);
+}
+.ttile b { display: block; font-size: 13.5px; margin-bottom: 3px; }
+.ttile span { display: block; font-size: 11.5px; color: var(--cozy-soft); white-space: normal; line-height: 1.3; }
+.ttile:active { transform: scale(0.97); }
+
+/* one tool open */
+.dpanel {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 16px;
+}
+html.app .dpanel .card { border: 0; padding: 0; margin: 0; background: transparent; border-radius: 0; }
+html.app .dpanel .card > .title { display: none; }
+html.app .dpanel .about { background: var(--cozy-bg); border-radius: 14px; font-size: 13px; padding: 10px 12px; }
+html.app .dpanel label { margin-top: 12px; }
+html.app .dpanel input[type=range] { height: 30px; accent-color: var(--cozy-accent); }
+html.app .dpanel select { border-radius: 12px; padding: 10px; background: var(--cozy-bg); border-color: var(--cozy-line); }
+html.app .dpanel .resetBtn { margin-top: 10px; border-radius: 12px; }
+html.app .dpanel .note { margin: 10px 0 0; font-size: 12.5px; padding: 9px 12px; border-radius: 14px; }
+html.app .dpanel .note.tip { display: none !important; }
+html.app .dpanel #refCard { margin-top: 10px; }
+html.app .dpanel #refCard .title { display: block; margin-bottom: 4px; }
+.dbtns {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px 0;
+    flex: 0 0 auto;
+}
+.dbtns button {
+    flex: 1;
+    border-radius: 16px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.dbtns button svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.dbtns .cancel { background: var(--cozy-bg); color: var(--cozy-ink); border: 1px solid var(--cozy-line); }
+.dbtns .keep { background: var(--cozy-accent); color: #fff; border: 0; box-shadow: 0 6px 16px rgba(59, 91, 219, 0.28); }
+
+.dock .anim { animation: dockIn 0.18s ease-out; }
+@keyframes dockIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* lab data page */
+html.app #viewData { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 12px 20px; }
+html.app #viewData.hidden { display: none !important; }
+html.app #viewData .card { border-radius: 18px; border-color: var(--cozy-line); }
+html.app #viewData h2 { display: none; }
+
+html.app #toast { bottom: auto; top: 64px; max-width: 90%; text-align: center; border-radius: 14px; }
+html.app .guide .gbox { border-radius: 24px; }
+
+/* learn-more page fills the phone screen */
+html.app .learn { padding: 0; align-items: stretch; }
+html.app .learn .gbox { max-height: 100%; height: 100%; border-radius: 0; }
+
+/* sample photos on the start screen */
+html.app .appstart .samples { margin: 2px 0 0; font-size: 13px; color: var(--cozy-soft); display: flex; align-items: center; gap: 8px; }
+html.app .appstart .samples button {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px 4px 4px;
+    background: var(--cozy-card);
+    border: 1px solid var(--cozy-line);
+    color: var(--cozy-ink);
+    font-size: 13px;
+}
+html.app .appstart .samples img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }

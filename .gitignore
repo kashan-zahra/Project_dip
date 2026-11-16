@@ -1,0 +1,33 @@
+# ---- never commit these ----
+*.jks
+*.keystore
+imagelab-key*
+*.apk
+*.aab
+*.zip
+
+# Android / Gradle build output
+android/.gradle/
+android/.idea/
+android/local.properties
+android/build/
+android/app/build/
+android/app/release/
+android/app/debug/
+*.iml
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node (parity test)
+node_modules/
+package-lock.json
+tests/out/
+
+# OS
+.DS_Store
+Thumbs.db

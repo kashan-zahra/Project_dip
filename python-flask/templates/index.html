@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Image Lab</title>
+    <style>
+        :root {
+            --bg: #f4f6f8;
+            --panel: #ffffff;
+            --panel2: #f0f3f6;
+            --line: #dde2e8;
+            --text: #1f2933;
+            --muted: #6b7785;
+            --accent: #2563eb;
+            --accent-ink: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* ---------- top bar ---------- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            padding: 12px 24px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            position: relative;
+        }
+
+        .dot::after {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .brand small {
+            font-weight: 400;
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: 4px;
+        }
+
+        nav {
+            display: flex;
+            gap: 6px;
+            background: var(--panel2);
+            padding: 4px;
+            border-radius: 999px;
+        }
+
+        nav button {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            padding: 8px 20px;
+            border-radius: 999px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        nav button.active {
+            background: var(--accent);
+            color: var(--accent-ink);
+            font-weight: 600;
+        }
+
+        /* ---------- studio layout ---------- */
+        .layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            padding: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            margin: 0 0 12px 0;
+        }
+
+        /* category pills + tool chips */
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tab {
+            border: 1px solid var(--line);
+            background: transparent;
+            color: var(--muted);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            background: var(--text);
+            color: #fff;
+            border-color: var(--text);
+            font-weight: 600;
+        }
+
+        .toolgrid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .tool {
+            text-align: left;
+            padding: 10px;
+            border: 1px solid var(--line);
+            background: var(--panel2);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1.25;
+        }
+
+        .tool:hover {
+            border-color: var(--muted);
+        }
+
+        .tool.active {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* settings */
+        .about {
+            font-size: 13px;
+            line-height: 1.5;
+            color: #3e4c59;
+            background: var(--panel2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        label {
+            display: block;
+            margin-top: 14px;
+            font-size: 13px;
+            color: #3e4c59;
+        }
+
+        label b {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        input[type=range] {
+            width: 100%;
+            margin-top: 6px;
+            accent-color: var(--accent);
+        }
+
+        select {
+            width: 100%;
+            margin-top: 6px;
+            padding: 8px;
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+        }
+
+        input[type=file] {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 8px;
+            max-width: 100%;
+        }
+
+        .thumb {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            display: block;
+        }
+
+        /* ---------- toolbar above the picture ---------- */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .seg {
+            display: flex;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .seg button {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .seg button.active {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            border-color: var(--muted);
+        }
+
+        .btn.main {
+            background: var(--accent);
+            color: var(--accent-ink);
+            border-color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ---------- the stage (picture area) ---------- */
+        .stage {
+            background: #e9edf2;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            min-height: 380px;
+        }
+
+        .dropzone {
+            height: 100%;
+            min-height: 348px;
+            border: 2px dashed #b9c2cc;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--muted);
+            cursor: pointer;
+            transition: 0.15s;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .dropzone:hover,
+        .dropzone.over {
+            border-color: var(--accent);
+            background: rgba(37, 99, 235, 0.06);
+            color: var(--accent);
+        }
+
+        .dropzone .big {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .dropzone:hover .big,
+        .dropzone.over .big {
+            color: var(--accent);
+        }
+
+        .views {
+            display: grid;
+            gap: 16px;
+        }
+
+        .views.split {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: 700px) {
+            .views.split {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .pane {
+            text-align: center;
+            min-width: 0;
+        }
+
+        .pane.off {
+            display: none;
+        }
+
+        .pane .cap {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .pane img {
+            max-width: 100%;
+            max-height: 68vh;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .pane .meta {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .loading {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--accent);
+            border-radius: 12px;
+        }
+
+        .loading.on {
+            display: flex;
+        }
+
+        .note {
+            background: rgba(37, 99, 235, 0.07);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #1e3a8a;
+        }
+
+        .note b {
+            color: var(--accent);
+        }
+
+        .geeklink {
+            margin-top: 14px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .geeklink a {
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* ---------- lab data page ---------- */
+        .data {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        .data h2 {
+            margin: 0 0 4px 0;
+        }
+
+        .data .sub {
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .data h4 {
+            margin: 0 0 6px 0;
+            font-size: 16px;
+        }
+
+        .data .why {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+            margin-bottom: 14px;
+        }
+
+        .two {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 700px) {
+            .two {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .two>div {
+            min-width: 0;
+            text-align: center;
+        }
+
+        canvas {
+            width: 100%;
+            background: #fafbfc;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+        }
+
+        .cap2 {
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--line);
+            padding: 9px;
+            text-align: center;
+        }
+
+        th {
+            color: var(--muted);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td:first-child {
+            text-align: left;
+        }
+
+        td:last-child {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .facts {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 14px;
+            color: #3e4c59;
+        }
+
+        .facts span {
+            color: var(--muted);
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #b42318;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            z-index: 10;
+        }
+
+        /* ---------- pixel inspector ---------- */
+        .inspector {
+            margin-top: 16px;
+        }
+
+        .inspector .readout {
+            font-size: 13px;
+            color: #3e4c59;
+            margin-bottom: 10px;
+        }
+
+        .inspector .readout b {
+            color: var(--accent);
+        }
+
+        .pixgrid {
+            border-collapse: collapse;
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+            width: auto;
+        }
+
+        .pixgrid td {
+            border: 1px solid var(--line);
+            width: 46px;
+            height: 30px;
+            padding: 0;
+            text-align: center;
+        }
+
+        .pixgrid td:first-child {
+            text-align: center;
+        }
+
+        .pixgrid td:last-child {
+            color: inherit;
+            font-weight: inherit;
+        }
+
+        .pixgrid td.mid {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+            font-weight: 700;
+        }
+
+        /* ---------- microscope (magnifier that follows the mouse) ---------- */
+        #lens {
+            position: fixed;
+            display: none;
+            width: 168px;
+            height: 168px;
+            pointer-events: none;
+            z-index: 20;
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .pane img {
+            cursor: crosshair;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="dot"></div>Image Lab <small>Digital Image Processing</small>
+        </div>
+        <nav>
+            <button id="navStudio" class="active">Studio</button>
+            <button id="navData">Lab Data</button>
+        </nav>
+    </header>
+
+    <!-- ======================= PAGE 1: STUDIO ======================= -->
+    <div id="viewStudio" class="layout">
+
+        <aside>
+            <div class="card">
+                <p class="title">Tools</p>
+                <div class="tabs" id="tabs"></div>
+                <div class="toolgrid" id="toolList"></div>
+            </div>
+
+            <!-- only visible for tools that need a second image -->
+            <div class="card hidden" id="refCard">
+                <p class="title">Reference image</p>
+                <div class="hint">This tool compares your image with a second image. Choose it here:</div>
+                <input type="file" id="refFile" accept="image/*">
+                <img id="refThumb" class="thumb hidden" alt="Reference image">
+            </div>
+
+            <div class="card">
+                <p class="title">Settings</p>
+                <div class="about hidden" id="about"></div>
+                <div id="controls">
+                    <div class="hint">Pick a tool to see its settings.</div>
+                </div>
+            </div>
+        </aside>
+
+        <section>
+            <div class="toolbar hidden" id="toolbar">
+                <div class="seg" id="seg">
+                    <button data-mode="split" class="active">Split</button>
+                    <button data-mode="before">Before</button>
+                    <button data-mode="after">After</button>
+                </div>
+                <div class="actions">
+                    <button class="btn" id="toggleInspect">Pixel Inspector: Off</button>
+                    <button class="btn" id="newImage">New image</button>
+                    <button class="btn" id="startOver">Start over</button>
+                    <button class="btn" id="useResult">Use result as new image</button>
+                    <a class="btn main" id="download" download="result.png">Download</a>
+                </div>
+            </div>
+
+            <div class="stage">
+                <div class="dropzone" id="drop">
+                    <div class="big">Drop an image here</div>
+                    or click to choose one
+                </div>
+
+                <div class="views split hidden" id="views">
+                    <div class="pane" id="paneBefore">
+                        <div class="cap">Before</div>
+                        <img id="imgOriginal" alt="Original image">
+                        <div class="meta" id="sizeOriginal"></div>
+                    </div>
+                    <div class="pane" id="paneAfter">
+                        <div class="cap" id="afterCap">After</div>
+                        <img id="imgResult" alt="Result image">
+                        <div class="meta" id="sizeResult"></div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">Processing...</div>
+            </div>
+            <input type="file" id="file" accept="image/*" class="hidden">
+
+            <div class="card inspector hidden" id="inspector">
+                <p class="title">Pixel Inspector</p>
+                <div class="readout" id="pixReadout">Move your mouse over the Before or After image. An image is just a
+                    grid of numbers, and this shows the numbers under your mouse (gray level, 0 = black, 255 = white).
+                </div>
+                <table class="pixgrid" id="pixGrid"></table>
+            </div>
+
+            <div class="note hidden" id="noteCard"><b>What happened:</b> <span id="noteText"></span></div>
+            <div class="geeklink hidden" id="geekLink">Want the numbers? <a id="goData">Open Lab Data</a> for histograms
+                and contrast measurements.</div>
+        </section>
+
+    </div>
+
+    <!-- ======================= PAGE 2: LAB DATA ======================= -->
+    <div id="viewData" class="data hidden">
+        <h2>Lab Data</h2>
+        <div class="sub" id="dataSub">Open an image in the Studio first, then come back here.</div>
+
+        <div id="dataBody" class="hidden">
+
+            <div class="card">
+                <div class="facts" id="facts"></div>
+            </div>
+
+            <div class="card">
+                <h4>Histogram</h4>
+                <div class="why">A histogram counts the pixels at each gray level, from 0 (black) on the left to 255
+                    (white) on the right. Tall bars on the left mean a dark image. Bars bunched together mean low
+                    contrast. Compare the two charts to see what the tool did to the pixel values.</div>
+                <div class="two">
+                    <div><canvas id="histOriginal"></canvas>
+                        <div class="cap2">Original</div>
+                    </div>
+                    <div><canvas id="histResult"></canvas>
+                        <div class="cap2">Result</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Image numbers</h4>
+                <div class="why">All values are measured on the gray version of the image. Simple contrast is max minus
+                    min. Michelson contrast is (max - min) / (max + min). RMS contrast is how far the pixels are spread
+                    around the mean.</div>
+                <table id="statsTable"></table>
+            </div>
+
+        </div>
+    </div>
+
+    <canvas id="lens" width="168" height="168"></canvas>
+
+    <div id="toast"></div>
+
+    <script>
+        // ============ TOOL LIST: add new tools here later ============
+        const TOOLS = {
+            // ---------- Enhance ----------
+            brightness_contrast: {
+                group: "Enhance", label: "Brightness / Contrast",
+                info: "g(x,y) = alpha * f(x,y) + beta.  alpha controls contrast, beta controls brightness.",
+                controls: [
+                    { name: "alpha", label: "Contrast (alpha)", type: "range", min: 0.1, max: 3, step: 0.1, value: 1 },
+                    { name: "beta", label: "Brightness (beta)", type: "range", min: -100, max: 100, step: 1, value: 0 }
+                ]
+            },
+            gamma: {
+                group: "Enhance", label: "Gamma Correction",
+                info: "s = 255 x (r / 255) ^ gamma. gamma below 1 brightens dark areas, above 1 darkens the image.",
+                controls: [
+                    { name: "gamma", label: "Gamma", type: "range", min: 0.1, max: 3, step: 0.1, value: 1 }
+                ]
+            },
+            negative: {
+                group: "Enhance", label: "Negative",
+                info: "s = 255 - r. Every pixel is flipped: dark becomes bright.",
+                controls: []
+            },
+            stretch: {
+                group: "Enhance", label: "Contrast Stretching",
+                info: "s = (r - r_min) / (r_max - r_min) x 255. Spreads the pixel values to fill 0 to 255.",
+                controls: []
+            },
+            equalize: {
+                group: "Enhance", label: "Histogram Equalization",
+                info: "Uses the CDF of the histogram to spread the gray levels evenly. Output is gray.",
+                controls: []
+            },
+            clahe: {
+                group: "Enhance", label: "CLAHE",
+                info: "Equalization done on small tiles, with a clip limit so noise is not boosted too much.",
+                controls: [
+                    { name: "clip", label: "Clip limit", type: "range", min: 1, max: 20, step: 1, value: 2 },
+                    { name: "tile", label: "Tile grid size", type: "range", min: 2, max: 16, step: 1, value: 8 }
+                ]
+            },
+
+            // ---------- Transform ----------
+            crop: {
+                group: "Transform", label: "Crop",
+                info: "Cut out a part of the image. Values are percentages of the image size.",
+                controls: [
+                    { name: "x", label: "Start X (%)", type: "range", min: 0, max: 99, step: 1, value: 25 },
+                    { name: "y", label: "Start Y (%)", type: "range", min: 0, max: 99, step: 1, value: 25 },
+                    { name: "w", label: "Width (%)", type: "range", min: 1, max: 100, step: 1, value: 50 },
+                    { name: "h", label: "Height (%)", type: "range", min: 1, max: 100, step: 1, value: 50 }
+                ]
+            },
+            resize: {
+                group: "Transform", label: "Resize (Interpolation)",
+                info: "Changes the image size. Interpolation decides how the new pixel values are guessed.",
+                controls: [
+                    { name: "percent", label: "Scale (%)", type: "range", min: 10, max: 300, step: 10, value: 50 },
+                    {
+                        name: "interp", label: "Interpolation", type: "select",
+                        options: [["nearest", "Nearest neighbor"], ["linear", "Bilinear"], ["cubic", "Bicubic"]]
+                    }
+                ]
+            },
+            rotate: {
+                group: "Transform", label: "Rotate",
+                info: "Rotates the pixel matrix by 90 or 180 degrees.",
+                controls: [
+                    {
+                        name: "mode", label: "Direction", type: "select",
+                        options: [["cw", "90 clockwise"], ["ccw", "90 counter-clockwise"], ["180", "180"]]
+                    }
+                ]
+            },
+            flip: {
+                group: "Transform", label: "Flip",
+                info: "Mirrors the image.",
+                controls: [
+                    {
+                        name: "mode", label: "Flip type", type: "select",
+                        options: [["h", "Horizontal"], ["v", "Vertical"], ["both", "Both"]]
+                    }
+                ]
+            },
+
+            // ---------- Filters ----------
+            mean: {
+                group: "Filters", label: "Mean (Average) Filter",
+                info: "Each pixel becomes the average of its neighbors. Smooths the image, but also blurs edges.",
+                controls: [
+                    { name: "size", label: "Window size", type: "range", min: 3, max: 15, step: 2, value: 5 }
+                ]
+            },
+            gaussian: {
+                group: "Filters", label: "Gaussian Filter",
+                info: "Like the mean filter, but nearby pixels count more than far pixels. Gives a smoother blur.",
+                controls: [
+                    { name: "size", label: "Window size", type: "range", min: 3, max: 15, step: 2, value: 5 }
+                ]
+            },
+            median: {
+                group: "Filters", label: "Median Filter",
+                info: "Each pixel becomes the middle value of its neighbors. Best for removing salt-and-pepper dots.",
+                controls: [
+                    { name: "size", label: "Window size", type: "range", min: 3, max: 15, step: 2, value: 5 }
+                ]
+            },
+            bilateral: {
+                group: "Filters", label: "Bilateral Filter",
+                info: "Smooths flat areas but keeps edges sharp, because it also checks how different the pixel values are.",
+                controls: [
+                    { name: "sigma", label: "Strength", type: "range", min: 10, max: 200, step: 5, value: 75 }
+                ]
+            },
+            noise: {
+                group: "Filters", label: "Add Gaussian Noise",
+                info: "Adds random values (bell curve shaped) to every pixel. Try this first, then clean it with the filters above.",
+                controls: [
+                    { name: "mean", label: "Noise mean", type: "range", min: -50, max: 50, step: 1, value: 0 },
+                    { name: "std", label: "Noise strength (std)", type: "range", min: 1, max: 100, step: 1, value: 20 }
+                ]
+            },
+
+            // ---------- Edges ----------
+            sobel: {
+                group: "Edges", label: "Sobel",
+                info: "Finds edges by measuring how fast brightness changes, left-right and up-down. Output is gray.",
+                controls: []
+            },
+            prewitt: {
+                group: "Edges", label: "Prewitt",
+                info: "Similar to Sobel, but all neighbor rows have equal weight.",
+                controls: []
+            },
+            roberts: {
+                group: "Edges", label: "Roberts",
+                info: "Uses a tiny 2x2 window across the diagonals. Fast, but sensitive to noise.",
+                controls: []
+            },
+            canny: {
+                group: "Edges", label: "Canny",
+                info: "Thin, clean edges. Edges stronger than the high threshold are kept. Weak ones are kept only if they touch a strong one.",
+                controls: [
+                    { name: "low", label: "Low threshold", type: "range", min: 0, max: 255, step: 5, value: 100 },
+                    { name: "high", label: "High threshold", type: "range", min: 0, max: 255, step: 5, value: 200 }
+                ]
+            },
+
+            // ---------- Color ----------
+            hsi_component: {
+                group: "Color", label: "HSI Components",
+                info: "Splits color into Hue (the color itself, 0 to 360 degrees), Saturation (how pure the color is) and Intensity (brightness = average of R, G, B).",
+                controls: [
+                    {
+                        name: "which", label: "Show", type: "select",
+                        options: [["h", "Hue"], ["s", "Saturation"], ["i", "Intensity"]]
+                    }
+                ]
+            },
+            hsi_roundtrip: {
+                group: "Color", label: "RGB to HSI to RGB",
+                info: "Converts to HSI and back again. If the formulas are right, the result looks the same as the original.",
+                controls: []
+            },
+            colorspace: {
+                group: "Color", label: "Color Spaces",
+                info: "The same image written in different color systems. HSV = hue, saturation, value. LAB = lightness plus two color axes. YCrCb = brightness plus two color differences (used in JPEG and video).",
+                controls: [
+                    {
+                        name: "space", label: "Color space", type: "select",
+                        options: [["hsv", "HSV"], ["lab", "LAB"], ["ycrcb", "YCrCb"], ["gray", "Gray"]]
+                    },
+                    {
+                        name: "channel", label: "Channel", type: "select",
+                        options: [["0", "All channels"], ["1", "Channel 1 (H / L / Y)"], ["2", "Channel 2 (S / a / Cr)"], ["3", "Channel 3 (V / b / Cb)"]]
+                    }
+                ]
+            },
+            channel: {
+                group: "Color", label: "RGB Channels",
+                info: "Shows one color channel as a gray image. Bright means a lot of that color is in the pixel.",
+                controls: [
+                    {
+                        name: "which", label: "Channel", type: "select",
+                        options: [["r", "Red"], ["g", "Green"], ["b", "Blue"]]
+                    }
+                ]
+            },
+
+            // ---------- Pixels ----------
+            sample: {
+                group: "Pixels", label: "Sampling",
+                info: "Sampling = how many pixels you keep. Fewer samples gives big blocks and less detail.",
+                controls: [
+                    { name: "size", label: "Pixels on the long side", type: "range", min: 4, max: 256, step: 4, value: 32 }
+                ]
+            },
+            quantize: {
+                group: "Pixels", label: "Quantization",
+                info: "Quantization = how many intensity levels you keep. Levels = 2 to the power of bits.",
+                controls: [
+                    { name: "bits", label: "Bits per channel", type: "range", min: 1, max: 8, step: 1, value: 3 }
+                ]
+            },
+            components: {
+                group: "Pixels", label: "Pixel Connectivity",
+                info: "Turns the image into black and white with a threshold, then groups touching white pixels. 4-connectivity: only up, down, left, right. 8-connectivity: also the diagonals.",
+                controls: [
+                    { name: "thresh", label: "Threshold", type: "range", min: 0, max: 255, step: 1, value: 128 },
+                    {
+                        name: "connectivity", label: "Connectivity", type: "select",
+                        options: [["4", "4-connectivity"], ["8", "8-connectivity"]]
+                    }
+                ]
+            },
+
+            log: {
+                group: "Enhance", label: "Log Transform",
+                info: "s = c x log(1 + r). Expands dark values and compresses bright ones.",
+                controls: [{ name: "c", label: "c", type: "range", min: 0.5, max: 2, step: 0.1, value: 1 }]
+            },
+            bitplane: {
+                group: "Enhance", label: "Bit-plane Slicing",
+                info: "A pixel is 8 bits. This shows one bit at a time. Bit 7 matters most.",
+                controls: [{ name: "bit", label: "Bit (7 = MSB, 0 = LSB)", type: "range", min: 0, max: 7, step: 1, value: 7 }]
+            },
+            laplacian: {
+                group: "Edges", label: "Laplacian",
+                info: "Second-derivative edge detector. Finds edges in every direction at once.", controls: []
+            },
+            threshold: {
+                group: "Segment", label: "Thresholding",
+                info: "Turns the image into black and white. Global uses your value, Otsu picks it automatically, adaptive decides per neighborhood.",
+                controls: [
+                    {
+                        name: "mode", label: "Method", type: "select",
+                        options: [["otsu", "Otsu"], ["global", "Global"], ["mean", "Adaptive (mean)"], ["gaussian", "Adaptive (Gaussian)"]]
+                    },
+                    { name: "t", label: "Threshold (Global only)", type: "range", min: 0, max: 255, step: 1, value: 128 }]
+            },
+            kmeans: {
+                group: "Segment", label: "K-Means",
+                info: "Clusters pixels by color into K groups. A simple way to segment an image.",
+                controls: [{ name: "k", label: "Clusters (K)", type: "range", min: 2, max: 8, step: 1, value: 3 }]
+            },
+            morph: {
+                group: "Morphology", label: "Erode / Dilate / Open / Close",
+                info: "Shape operations using a square window.",
+                controls: [
+                    {
+                        name: "op", label: "Operation", type: "select",
+                        options: [["erode", "Erosion"], ["dilate", "Dilation"], ["open", "Opening"], ["close", "Closing"]]
+                    },
+                    { name: "size", label: "Window size", type: "range", min: 3, max: 15, step: 2, value: 3 }]
+            },
+            fft: {
+                group: "Frequency", label: "FFT Filters",
+                info: "Moves the image to the frequency domain. Low frequencies = smooth areas, high frequencies = edges and details.",
+                controls: [
+                    {
+                        name: "mode", label: "Show", type: "select",
+                        options: [["spectrum", "Spectrum"], ["low", "Low-pass"], ["high", "High-pass"]]
+                    },
+                    { name: "radius", label: "Cutoff radius", type: "range", min: 5, max: 200, step: 5, value: 30 }]
+            },
+
+            // ---------- Compare (need a reference image) ----------
+            match: {
+                group: "Compare", label: "Histogram Matching", needsRef: true,
+                info: "Changes your image so its histogram looks like the reference image's histogram.",
+                controls: []
+            },
+            compare: {
+                group: "Compare", label: "Pixel Similarity", needsRef: true,
+                info: "Compares both images pixel by pixel. A pixel is 'similar' if the difference is within the tolerance. White = similar, black = different.",
+                controls: [
+                    { name: "tol", label: "Tolerance", type: "range", min: 0, max: 50, step: 1, value: 5 }
+                ]
+            }
+        };
+
+        const STAT_LABELS = [
+            ["min", "Minimum intensity"],
+            ["max", "Maximum intensity"],
+            ["mean", "Mean intensity"],
+            ["range", "Simple contrast (max - min)"],
+            ["michelson", "Michelson contrast"],
+            ["rms", "RMS contrast"]
+        ];
+
+        // ============ STATE ============
+        const CATEGORIES = [...new Set(Object.values(TOOLS).map(t => t.group))];
+        let currentCategory = CATEGORIES[0];
+        let currentTool = null;      // nothing picked at the start
+        let originalFile = null;     // the file the user uploaded
+        let currentFile = null;      // the image we are working on now
+        let referenceFile = null;    // second image (for Compare tools)
+        let lastResult = null;       // result picture (data URL)
+        let lastData = null;         // everything Python sent back last time
+        let viewMode = "split";      // split, before or after
+        let timer = null;
+        let requestId = 0;
+
+        const $ = id => document.getElementById(id);
+
+        // ============ TWO PAGES ============
+        function setPage(name) {
+            const studio = name === "studio";
+            $("viewStudio").classList.toggle("hidden", !studio);
+            $("viewData").classList.toggle("hidden", studio);
+            $("navStudio").classList.toggle("active", studio);
+            $("navData").classList.toggle("active", !studio);
+        }
+        $("navStudio").onclick = () => setPage("studio");
+        $("navData").onclick = () => setPage("data");
+        $("goData").onclick = () => setPage("data");
+
+        // ============ UPLOAD (the big drop area) ============
+        const drop = $("drop");
+        drop.addEventListener("click", () => $("file").click());
+        $("newImage").addEventListener("click", () => $("file").click());
+        $("file").addEventListener("change", () => {
+            if ($("file").files[0]) newImage($("file").files[0]);
+            $("file").value = "";
+        });
+        drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+        drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+        drop.addEventListener("drop", e => {
+            e.preventDefault();
+            drop.classList.remove("over");
+            const f = e.dataTransfer.files[0];
+            if (f && f.type.startsWith("image/")) newImage(f);
+            else toast("Please drop an image file.");
+        });
+
+        function newImage(file) {
+            originalFile = file;
+            currentFile = file;
+            currentTool = null;
+            drop.classList.add("hidden");
+            $("views").classList.remove("hidden");
+            $("toolbar").classList.remove("hidden");
+            $("geekLink").classList.remove("hidden");
+            renderTools();
+            buildControls();
+            run();
+        }
+
+        // ============ REFERENCE IMAGE ============
+        $("refFile").addEventListener("change", () => {
+            const f = $("refFile").files[0];
+            if (!f) return;
+            referenceFile = f;
+            const thumb = $("refThumb");
+            thumb.src = URL.createObjectURL(f);
+            thumb.classList.remove("hidden");
+            schedule();
+        });
+
+        // ============ VIEW SWITCH: split / before / after ============
+        function setMode(mode) {
+            viewMode = mode;
+            document.querySelectorAll("#seg button").forEach(b => {
+                b.classList.toggle("active", b.dataset.mode === mode);
+            });
+            $("views").classList.toggle("split", mode === "split");
+            $("paneBefore").classList.toggle("off", mode === "after");
+            $("paneAfter").classList.toggle("off", mode === "before");
+        }
+        document.querySelectorAll("#seg button").forEach(b => {
+            b.onclick = () => setMode(b.dataset.mode);
+        });
+
+        // ============ TABS AND TOOL BUTTONS ============
+        function renderTabs() {
+            const box = $("tabs");
+            box.innerHTML = "";
+            CATEGORIES.forEach(cat => {
+                const b = document.createElement("button");
+                b.className = "tab" + (cat === currentCategory ? " active" : "");
+                b.textContent = cat;
+                b.onclick = () => { currentCategory = cat; renderTabs(); renderTools(); };
+                box.appendChild(b);
+            });
+        }
+
+        function renderTools() {
+            const box = $("toolList");
+            box.innerHTML = "";
+            Object.keys(TOOLS).forEach(key => {
+                if (TOOLS[key].group !== currentCategory) return;
+                const b = document.createElement("button");
+                b.className = "tool" + (key === currentTool ? " active" : "");
+                b.textContent = TOOLS[key].label;
+                b.onclick = () => selectTool(key);
+                box.appendChild(b);
+            });
+        }
+
+        function selectTool(key) {
+            currentTool = key;
+            renderTools();
+            buildControls();
+            schedule();
+        }
+
+        // ============ SLIDERS AND DROPDOWNS ============
+        function buildControls() {
+            const box = $("controls");
+            const about = $("about");
+            box.innerHTML = "";
+
+            // show the reference box only for tools that need it
+            const needsRef = currentTool && TOOLS[currentTool].needsRef;
+            $("refCard").classList.toggle("hidden", !needsRef);
+
+            if (!currentTool) {
+                about.classList.add("hidden");
+                box.innerHTML = '<div class="hint">Pick a tool to see its settings.</div>';
+                return;
+            }
+
+            const tool = TOOLS[currentTool];
+            about.textContent = tool.info;
+            about.classList.remove("hidden");
+
+            if (tool.controls.length === 0) {
+                box.innerHTML = '<div class="hint">This tool has no settings.</div>';
+                return;
+            }
+
+            tool.controls.forEach(c => {
+                const label = document.createElement("label");
+                label.textContent = c.label;
+                let input;
+
+                if (c.type === "range") {
+                    const span = document.createElement("b");
+                    span.textContent = ": " + c.value;
+                    label.appendChild(span);
+                    input = document.createElement("input");
+                    input.type = "range";
+                    input.min = c.min;
+                    input.max = c.max;
+                    input.step = c.step;
+                    input.value = c.value;
+                    input.addEventListener("input", () => {
+                        span.textContent = ": " + input.value;
+                        schedule();
+                    });
+                } else {
+                    input = document.createElement("select");
+                    c.options.forEach(o => {
+                        const opt = document.createElement("option");
+                        opt.value = o[0];
+                        opt.textContent = o[1];
+                        input.appendChild(opt);
+                    });
+                    input.addEventListener("change", schedule);
+                }
+
+                input.name = c.name;
+                label.appendChild(input);
+                box.appendChild(label);
+            });
+        }
+
+        // wait a moment after the last slider move, then send
+        function schedule() {
+            clearTimeout(timer);
+            timer = setTimeout(run, 200);
+        }
+
+        // ============ TALK TO PYTHON ============
+        async function run() {
+            if (!currentFile) return;
+            const myId = ++requestId;
+            $("loading").classList.add("on");
+
+            const fd = new FormData();
+            fd.append("image", currentFile);
+            fd.append("tool", currentTool || "none");
+            if (referenceFile && currentTool && TOOLS[currentTool].needsRef) {
+                fd.append("reference", referenceFile);
+            }
+            $("controls").querySelectorAll("input, select").forEach(el => {
+                fd.append(el.name, el.value);
+            });
+
+            try {
+                const res = await fetch("/process", { method: "POST", body: fd });
+                const data = await res.json();
+                if (myId !== requestId) return;          // an older request, ignore it
+                if (data.error) { toast(data.error); return; }
+                show(data);
+            } catch (err) {
+                toast("Could not reach the server. Is app.py still running?");
+            } finally {
+                if (myId === requestId) $("loading").classList.remove("on");
+            }
+        }
+
+        function show(data) {
+            lastData = data;
+            lastResult = data.result;
+            const toolName = currentTool ? TOOLS[currentTool].label : null;
+
+            // ----- Studio page -----
+            $("imgOriginal").src = data.original;
+            $("imgResult").src = data.result;
+            $("sizeOriginal").textContent = data.size_original;
+            $("sizeResult").textContent = data.size_result;
+            $("afterCap").textContent = toolName ? "After: " + toolName : "After (pick a tool)";
+            $("download").href = data.result;
+
+            if (data.note) {
+                $("noteText").textContent = data.note;
+                $("noteCard").classList.remove("hidden");
+            } else {
+                $("noteCard").classList.add("hidden");
+            }
+
+            // ----- Lab Data page (filled quietly in the background) -----
+            $("dataSub").textContent = "Numbers behind the picture. Tool: " + (toolName || "none selected yet");
+            $("dataBody").classList.remove("hidden");
+            $("facts").innerHTML =
+                `<div><span>Original size:</span> ${data.size_original}</div>` +
+                `<div><span>Result size:</span> ${data.size_result}</div>` +
+                `<div><span>Tool:</span> ${toolName || "none"}</div>`;
+            drawHist($("histOriginal"), data.hist_original, "#8b95a1");
+            drawHist($("histResult"), data.hist_result, "#2563eb");
+            showStats(data.stats_original, data.stats_result);
+        }
+
+        // ============ HISTOGRAM (256 bars) ============
+        function drawHist(canvas, hist, color) {
+            canvas.width = 512;
+            canvas.height = 200;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, 512, 200);
+            const max = Math.max(...hist) || 1;
+            ctx.fillStyle = color;
+            for (let i = 0; i < 256; i++) {
+                const h = (hist[i] / max) * 190;
+                ctx.fillRect(i * 2, 200 - h, 2, h);
+            }
+        }
+
+        // ============ NUMBERS TABLE ============
+        function showStats(a, b) {
+            let html = "<tr><th>Measure</th><th>Original</th><th>Result</th></tr>";
+            STAT_LABELS.forEach(s => {
+                html += `<tr><td>${s[1]}</td><td>${a[s[0]]}</td><td>${b[s[0]]}</td></tr>`;
+            });
+            $("statsTable").innerHTML = html;
+        }
+
+        // ============ BUTTONS ============
+        // make the result the new starting image, so tools can be chained
+        $("useResult").addEventListener("click", async () => {
+            if (!lastResult) return;
+            const blob = await (await fetch(lastResult)).blob();
+            currentFile = new File([blob], "edited.png", { type: "image/png" });
+            currentTool = null;
+            renderTools();
+            buildControls();
+            run();
+            toast("Done. The result is now your image. Pick another tool.", true);
+        });
+
+        $("startOver").addEventListener("click", () => {
+            if (!originalFile) return;
+            currentFile = originalFile;
+            currentTool = null;
+            renderTools();
+            buildControls();
+            run();
+        });
+
+        // ============ SMALL POP-UP MESSAGE ============
+        function toast(msg, good) {
+            const t = $("toast");
+            t.textContent = msg;
+            t.style.background = good ? "#067647" : "#b42318";
+            t.style.display = "block";
+            setTimeout(() => { t.style.display = "none"; }, 3000);
+        }
+
+        // ============ PIXEL INSPECTOR ============
+        // reads the pixel under the mouse from the picture that is on screen
+        function pixelCanvas(img) {
+            if (img._src !== img.src) {
+                const c = document.createElement("canvas");
+                c.width = img.naturalWidth;
+                c.height = img.naturalHeight;
+                c.getContext("2d", { willReadFrequently: true }).drawImage(img, 0, 0);
+                img._cv = c;
+                img._src = img.src;
+            }
+            return img._cv;
+        }
+
+        function inspect(img, label, e) {
+            if (!inspectOn) return;
+            if (!img.complete || !img.naturalWidth) return;
+            const r = img.getBoundingClientRect();
+            const x = Math.floor((e.clientX - r.left) / r.width * img.naturalWidth);
+            const y = Math.floor((e.clientY - r.top) / r.height * img.naturalHeight);
+            if (x < 0 || y < 0 || x >= img.naturalWidth || y >= img.naturalHeight) return;
+
+            const ctx = pixelCanvas(img).getContext("2d", { willReadFrequently: true });
+            const gray = (d, i) => Math.round(0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]);
+
+            // the 5 x 5 block around the mouse
+            const block = ctx.getImageData(x - 2, y - 2, 5, 5).data;
+            let rows = "";
+            for (let j = 0; j < 5; j++) {
+                rows += "<tr>";
+                for (let i = 0; i < 5; i++) {
+                    const k = (j * 5 + i) * 4;
+                    const inside = (x + i - 2 >= 0 && y + j - 2 >= 0 &&
+                        x + i - 2 < img.naturalWidth && y + j - 2 < img.naturalHeight);
+                    const g = inside ? gray(block, k) : "";
+                    const bg = inside ? `rgb(${g},${g},${g})` : "transparent";
+                    const fg = g !== "" && g < 128 ? "#fff" : "#1f2933";
+                    rows += `<td class="${i === 2 && j === 2 ? "mid" : ""}" style="background:${bg};color:${fg}">${g}</td>`;
+                }
+                rows += "</tr>";
+            }
+            $("pixGrid").innerHTML = rows;
+
+            const c = block.slice(12 * 4 - 0, 12 * 4 + 4);   // centre pixel = index 12
+            $("pixReadout").innerHTML =
+                `<b>${label}</b> image, pixel (x = ${x}, y = ${y}): ` +
+                `R = ${c[0]}, G = ${c[1]}, B = ${c[2]}, gray = ${gray(c, 0)}`;
+        }
+        $("imgOriginal").addEventListener("mousemove", e => inspect($("imgOriginal"), "Before", e));
+        $("imgResult").addEventListener("mousemove", e => inspect($("imgResult"), "After", e));
+
+        // ============ MICROSCOPE (magnifier that follows the mouse) ============
+        const lens = $("lens");
+        let inspectOn = false;
+        $("toggleInspect").onclick = () => {
+            inspectOn = !inspectOn;
+            $("inspector").classList.toggle("hidden", !inspectOn);
+            $("toggleInspect").textContent = "Pixel Inspector: " + (inspectOn ? "On" : "Off");
+            $("toggleInspect").classList.toggle("main", inspectOn);
+            if (!inspectOn) lens.style.display = "none";
+        };
+
+        const lctx = lens.getContext("2d");
+        const N = 7, CELL = 24;          // 7 x 7 pixels, each one drawn 24 px wide
+
+        function microscope(img, e) {
+            if (!inspectOn) return;
+            if (!img.complete || !img.naturalWidth) return;
+            const r = img.getBoundingClientRect();
+            const x = Math.floor((e.clientX - r.left) / r.width * img.naturalWidth);
+            const y = Math.floor((e.clientY - r.top) / r.height * img.naturalHeight);
+            if (x < 0 || y < 0 || x >= img.naturalWidth || y >= img.naturalHeight) {
+                lens.style.display = "none";
+                return;
+            }
+
+            const half = (N - 1) / 2;
+            const ctx = pixelCanvas(img).getContext("2d", { willReadFrequently: true });
+            const data = ctx.getImageData(x - half, y - half, N, N).data;
+
+            lctx.clearRect(0, 0, lens.width, lens.height);
+            lctx.font = "10px Segoe UI, Arial";
+            lctx.textAlign = "center";
+            lctx.textBaseline = "middle";
+
+            for (let j = 0; j < N; j++) {
+                for (let i = 0; i < N; i++) {
+                    const k = (j * N + i) * 4;
+                    const px = x + i - half, py = y + j - half;
+                    const inside = px >= 0 && py >= 0 && px < img.naturalWidth && py < img.naturalHeight;
+                    if (!inside) {
+                        lctx.fillStyle = "#e5e9ee";
+                        lctx.fillRect(i * CELL, j * CELL, CELL, CELL);
+                        continue;
+                    }
+                    const R = data[k], G = data[k + 1], B = data[k + 2];
+                    const gray = Math.round(0.299 * R + 0.587 * G + 0.114 * B);
+                    lctx.fillStyle = `rgb(${R},${G},${B})`;       // the real pixel color
+                    lctx.fillRect(i * CELL, j * CELL, CELL, CELL);
+                    lctx.fillStyle = gray < 128 ? "#fff" : "#000";
+                    lctx.fillText(gray, i * CELL + CELL / 2, j * CELL + CELL / 2);   // its gray value
+                }
+            }
+            // outline the pixel that is exactly under the mouse
+            lctx.strokeStyle = "#2563eb";
+            lctx.lineWidth = 2;
+            lctx.strokeRect(half * CELL + 1, half * CELL + 1, CELL - 2, CELL - 2);
+
+            // put the lens next to the mouse, flip it if it would leave the window
+            let lx = e.clientX + 20, ly = e.clientY + 20;
+            if (lx + 172 > window.innerWidth) lx = e.clientX - 192;
+            if (ly + 172 > window.innerHeight) ly = e.clientY - 192;
+            lens.style.left = lx + "px";
+            lens.style.top = ly + "px";
+            lens.style.display = "block";
+        }
+
+        ["imgOriginal", "imgResult"].forEach(id => {
+            $(id).addEventListener("mousemove", e => microscope($(id), e));
+            $(id).addEventListener("mouseleave", () => { lens.style.display = "none"; });
+        });
+
+        // ============ START ============
+        renderTabs();
+        renderTools();
+        buildControls();
+        setMode("split");
+    </script>
+</body>
+
+</html>
