@@ -1,0 +1,17 @@
+{
+    // use the project's own venv (created by setup.bat)
+    "python.defaultInterpreterPath": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+    "python.terminal.activateEnvironment": true,
+
+    // keep big or generated folders out of search and the file list
+    "search.exclude": {
+        "venv": true,
+        "web/vendor": true,
+        "android/.gradle": true,
+        "android/app/build": true,
+        "**/__pycache__": true
+    },
+    "files.exclude": {
+        "**/__pycache__": true
+    }
+}

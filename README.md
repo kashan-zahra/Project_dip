@@ -137,6 +137,14 @@ docs/screenshots/
 
 ## Run it yourself
 
+**Easiest on Windows (with VS Code)**
+
+1. Double-click **`setup.bat`** once. It creates the Python virtual environment in `venv/` and installs
+   everything from `python-flask/requirements.txt`.
+2. Open the project folder in VS Code (*File → Open Folder*). It uses the `venv` automatically.
+3. Press **F5** and pick *Image Lab: Flask (Python engine)* or *Image Lab: Website (browser engine)*.
+   Or just double-click `run-flask.bat` / `run-website.bat`.
+
 **Python / Flask (the image processing runs in Python)**
 
 ```bash

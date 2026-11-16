@@ -1,0 +1,34 @@
+{
+    // Press F5 in VS Code and pick one of these
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Image Lab: Flask (Python engine)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/python-flask/app.py",
+            "cwd": "${workspaceFolder}/python-flask",
+            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Image Lab: Website (browser engine)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "http.server",
+            "args": ["8000"],
+            "cwd": "${workspaceFolder}/web",
+            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Parity test: make Python reference",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/tests/make_reference.py",
+            "python": "${workspaceFolder}\\venv\\Scripts\\python.exe",
+            "console": "integratedTerminal"
+        }
+    ]
+}
