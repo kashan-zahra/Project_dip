@@ -106,6 +106,11 @@ one interface; only the engine underneath changes.
   every pixel: 44 match within 1 gray level, and the 3 differences are explained there.
 - **Learn more pages are generated** from `processing.py` by [`scripts/build_learn_data.py`](scripts/build_learn_data.py),
   so the code shown in the app is always the code the lab version runs.
+- **Behind the scenes (Flask versions).** Click the After picture to flip it. [`behind.py`](python-flask/behind.py)
+  records every `processing.py` call with its real values, file and line number, and
+  [`explain.py`](python-flask/explain.py) works out the exact calculation for one pixel (click the Before picture
+  to choose it): neighbour grids, kernels, every sum. The page checks that this hand calculation gives the same
+  number as OpenCV (it does for all 35 tools, tested on 2,340 pixels; linear resize can be 1 off from rounding).
 - **Phone-friendly Android layout.** Inside the app the same page switches to an app layout
   (`css/app.css`, `js/app-layout.js`): a start screen, a top bar and a bottom dock that shows one thing at a time.
 

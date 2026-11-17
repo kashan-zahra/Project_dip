@@ -304,6 +304,7 @@ async function run() {
 
     const form = {};
     $("controls").querySelectorAll("input, select").forEach(el => { form[el.name] = el.value; });
+    if (SERVER_MODE && pickedPixel) { form._px = pickedPixel[0]; form._py = pickedPixel[1]; }  // Behind the scenes
     const tool = currentTool || "none";
     const ref = (currentTool && TOOLS[currentTool].needsRef) ? referenceImg : null;
     const base = (compareOriginal && steps.length > 1) ? steps[0].img : currentImg;

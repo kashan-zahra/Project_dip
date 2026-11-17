@@ -1060,3 +1060,29 @@ td:last-child {
 .behind .bfile { font-size: 11px; color: var(--muted); font-family: Consolas, monospace; margin: 6px 0 -2px; }
 .behind pre.numbered .ln { display: inline-block; width: 2.6em; margin-right: 10px; padding-right: 8px; text-align: right;
                            color: #5c6680; border-right: 1px solid #343a4d; user-select: none; }
+
+/* Behind the scenes: the worked calculation for one pixel */
+.pickwrap { position: relative; }
+.pickmark { position: absolute; width: 22px; height: 22px; margin: -11px 0 0 -11px; pointer-events: none;
+            border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 2px var(--accent), 0 0 6px rgba(0, 0, 0, 0.6); }
+.pickmark::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px;
+                   background: var(--accent); border-radius: 50%; }
+.flipcard.flipped ~ * .pickmark, .pickmark.hidden { display: none; }
+body:has(.flipcard.flipped) #imgOriginal { cursor: crosshair; }
+.behind .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 4px; margin-right: 6px; vertical-align: -2px;
+                  border: 1px solid rgba(0, 0, 0, 0.25); }
+.behind .msub { margin: 10px 0 4px; font-weight: 600; font-size: 12.5px; color: #1e3a8a; }
+.behind pre.math { margin: 4px 0; background: #f6f8fc; color: #1f2937; border: 1px solid var(--line); border-radius: 8px;
+                   padding: 8px 10px; font-family: Consolas, "Courier New", monospace; font-size: 12px; line-height: 1.5;
+                   white-space: pre-wrap; user-select: text; }
+.behind .bgrids { display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0; }
+.behind .bgrid table { border-collapse: collapse; font-family: Consolas, monospace; font-size: 11px; }
+.behind .bgrid td { border: 1px solid var(--line); padding: 2px 5px; text-align: right; min-width: 26px; background: #fff; }
+.behind .bgrid td.mk { background: #fde68a; font-weight: 700; }
+.behind .bglabel { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.behind .bcheck { margin-top: 10px; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.5; }
+.behind .bcheck.exact { background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; }
+.behind .bcheck.close { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.behind .bcheck.off { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.behind .bgrid td, .behind .bgrid td:last-child { color: #1f2937; font-weight: 400; }
+.behind .bgrid td.mk { font-weight: 700; }

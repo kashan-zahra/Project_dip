@@ -92,6 +92,7 @@ if (!seenGuide) openGuide();
 // as data.trace. The back of the After card shows it, live, while you move the sliders.
 let behindOn = false;
 let lastTrace = null;
+let pickedPixel = null;      // [0 ... 1, 0 ... 1] on the picture, or null = the centre
 
 function escapeHtml(t) {
     return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -128,21 +129,75 @@ function renderTrace() {
             `<div><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.value)}</span></div>`).join("") + "</div>";
         html += numberedCode(c.code, c.file || "processing.py", c.line || 1);
     });
-    const e = t.example;
-    html += `<div class="bstep"><span class="bn">4</span>Example: the pixel in the centre (x = ${e.x}, y = ${e.y})</div>
-        <div class="bpixel"><span>${escapeHtml(e.before)}</span><b>&#8594;</b><span>${escapeHtml(e.after)}</span></div>`;
+    html += renderPixelMath(t.example);
     html += `<p class="bfoot">Took ${t.ms} ms in Python · picture ${t.size_in} → ${t.size_out}</p>
         <p class="bfoot">Tip: click anywhere on this card to flip back to the picture.</p>`;
     box.innerHTML = html;
     $("behindClose").onclick = toggleBehind;
+    if ($("useCentre")) $("useCentre").onclick = ev => { ev.stopPropagation(); pickedPixel = null; schedule(); };
+    placePickMark();
 }
+
+// ----- step 4: the full calculation for one pixel -----
+function swatch(rgbv) {
+    if (!rgbv) return "";
+    const c = rgbv.length === 1 ? `rgb(${rgbv[0]},${rgbv[0]},${rgbv[0]})` : `rgb(${rgbv.join(",")})`;
+    return `<i class="swatch" style="background:${c}"></i>`;
+}
+
+function mathGrid(g) {
+    const rows = g.rows.map((r, i) => "<tr>" + r.map((v, j) =>
+        `<td${g.mark && g.mark[0] === i && g.mark[1] === j ? ' class="mk"' : ""}>${escapeHtml(v)}</td>`).join("") + "</tr>").join("");
+    return `<div class="bgrid"><div class="bglabel">${escapeHtml(g.label)}</div><table>${rows}</table></div>`;
+}
+
+function renderPixelMath(e) {
+    const where = e.picked ? `the pixel you picked (x = ${e.x}, y = ${e.y})` : `the pixel in the centre (x = ${e.x}, y = ${e.y})`;
+    let h = `<div class="bstep"><span class="bn">4</span>The calculation for ${where}</div>
+        <p class="bhint">Click any spot on the <b>Before</b> picture to explain that pixel instead${
+            e.picked ? ' · <a href="#" id="useCentre">use the centre again</a>' : ""}.</p>
+        <div class="bpixel">${e.before ? `<span>${swatch(e.before_rgb)}${escapeHtml(e.before)}</span><b>&#8594;</b>` : ""}
+            <span>${swatch(e.after_rgb)}${escapeHtml(e.after)}</span></div>`;
+    (e.steps || []).forEach(s => {
+        h += `<div class="msub">${escapeHtml(s.title)}</div>`;
+        if (s.grids && s.grids.length) h += `<div class="bgrids">${s.grids.map(mathGrid).join("")}</div>`;
+        const lines = (s.lines || []).filter(l => l !== "");
+        if (lines.length) h += `<pre class="math">${escapeHtml(lines.join("\n"))}</pre>`;
+    });
+    if (e.mine) {
+        const names = e.after_rgb.length === 1 ? ["gray"] : ["R", "G", "B"];
+        const mine = e.mine.map((v, i) => `${names[i] === "gray" ? "gray" : names[i]} ${v}`).join(", ");
+        const msg = {
+            exact: "&#10004; Exactly the same. The maths above is what the computer really did.",
+            close: "&#8776; 1 off at most: OpenCV rounds with whole numbers inside to be faster.",
+            off: "&#9888; Different: this tool does extra steps inside OpenCV that the summary above skips.",
+        }[e.match];
+        h += `<div class="bcheck ${e.match}"><b>Check</b><br>our calculation: ${escapeHtml(mine)}<br>
+            real result from OpenCV: ${escapeHtml(e.after)}<br>${msg}</div>`;
+    }
+    return h;
+}
+
+// small cross on the Before picture where the explained pixel is
+function placePickMark() {
+    const m = $("pickMark"), img = $("imgOriginal");
+    if (!behindOn || !lastTrace || !img.naturalWidth) { m.classList.add("hidden"); return; }
+    const fx = pickedPixel ? pickedPixel[0] : 0.5, fy = pickedPixel ? pickedPixel[1] : 0.5;
+    const r = img.getBoundingClientRect(), pr = img.parentElement.getBoundingClientRect();
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const s = Math.min(r.width / W, r.height / H);
+    m.style.left = (r.left - pr.left + (r.width - W * s) / 2 + fx * W * s) + "px";
+    m.style.top = (r.top - pr.top + (r.height - H * s) / 2 + fy * H * s) + "px";
+    m.classList.remove("hidden");
+}
+window.addEventListener("resize", placePickMark);
 
 function toggleBehind() {
     behindOn = !behindOn;
     if (behindOn && viewMode === "before") setMode("split");
     $("paneAfter").classList.toggle("flipped", behindOn);
     $("behindBtn").classList.toggle("main", behindOn);
-    if (behindOn) renderTrace();
+    if (behindOn) renderTrace(); else placePickMark();
 }
 
 if (SERVER_MODE && !document.documentElement.classList.contains("app")) {
@@ -157,5 +212,15 @@ if (SERVER_MODE && !document.documentElement.classList.contains("app")) {
         if (e.target.closest("button, a, input")) return;
         if (String(window.getSelection())) return;               // selecting code to copy, not flipping
         toggleBehind();
+    });
+
+    // while the card shows Behind the scenes: click the Before picture to choose the pixel to explain
+    $("imgOriginal").addEventListener("click", e => {
+        if (!behindOn || inspectOn) return;
+        const img = $("imgOriginal");
+        const [x, y] = imgXY(img, e);
+        if (x < 0 || y < 0 || x >= img.naturalWidth || y >= img.naturalHeight) return;
+        pickedPixel = [(x + 0.5) / img.naturalWidth, (y + 0.5) / img.naturalHeight];
+        schedule();
     });
 }

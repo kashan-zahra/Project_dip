@@ -11,6 +11,8 @@ import time
 
 import numpy as np
 
+import explain
+
 
 class Recorder:
     """Stands in for processing.py during one request and notes every function call."""
@@ -39,6 +41,14 @@ def describe(value):
     if isinstance(value, float):
         return f"{value:g}"
     return repr(value)
+
+
+def rgb(img, x, y):
+    """[R, G, B] or [gray] as plain numbers, for the colour swatches."""
+    if img.ndim == 2:
+        return [int(img[y, x])]
+    b, g, r = (int(v) for v in img[y, x][:3])
+    return [r, g, b]
 
 
 def pixel(img, x, y):
@@ -89,16 +99,29 @@ def run_with_trace(app_module, img, tool, form, ref):
         calls.append({"name": name, "params": params, "code": "".join(code), "line": line,
                       "file": os.path.basename(inspect.getsourcefile(func))})
 
+    # example pixel: the one you clicked (sent as _px, _py = 0 ... 1), or the centre
     h, w = img.shape[:2]
-    x, y = w // 2, h // 2                           # example pixel: the centre of the picture
-    example = {"x": x, "y": y, "before": pixel(img, x, y)}
-    if out.shape[:2] == img.shape[:2]:
-        example["after"] = pixel(out, x, y)
-    else:
-        oh, ow = out.shape[:2]
-        example["after"] = f"(the picture is now {ow} x {oh}, so pixels moved)"
+    oh, ow = out.shape[:2]
+    try:
+        fx, fy = float(form.get("_px", 0.5)), float(form.get("_py", 0.5))
+    except ValueError:
+        fx, fy = 0.5, 0.5
+    x = min(max(int(fx * ow), 0), ow - 1)
+    y = min(max(int(fy * oh), 0), oh - 1)
+    same = out.shape[:2] == img.shape[:2]
+    example = {"x": x, "y": y, "picked": "_px" in form,
+               "before": pixel(img, x, y) if same else None, "before_rgb": rgb(img, x, y) if same else None,
+               "after": pixel(out, x, y), "after_rgb": rgb(out, x, y)}
+    steps, mine, real = explain.explain(tool, img, out, form, ref, x, y)
+    match = None
+    if mine is not None:
+        diff = max(abs(int(a) - int(b)) for a, b in zip(mine, real))
+        match = "exact" if diff == 0 else ("close" if diff <= 1 else "off")
+    example["steps"] = steps
+    example["mine"] = [int(v) for v in mine] if mine is not None else None
+    example["match"] = match
 
-    settings = {k: v for k, v in form.items() if k != "tool"}
+    settings = {k: v for k, v in form.items() if k != "tool" and not k.startswith("_")}
     run_code, run_line = run_tool_lines(app_module, tool)
     trace = {
         "tool": tool,

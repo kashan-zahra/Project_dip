@@ -449,3 +449,7 @@ html.app .choice button.on {
     font-weight: 600;
 }
 html.app .choice button:active { transform: scale(0.97); }
+
+/* the flip card (Behind the scenes) and the pixel-picker wrapper: pass the full height through */
+html.app .flipper, html.app .front, html.app .pickwrap { height: 100%; }
+html.app .back, html.app .pickmark { display: none; }
