@@ -122,10 +122,10 @@ def edges(img, method):
 def hsi(img, part):
     # I = (R+G+B)/3,  S = 1 - 3*min(R,G,B)/(R+G+B),  H = angle on the colour wheel
     b, g, r = [c.astype(np.float64) for c in cv2.split(img)]
-    if part == "i":
+    if part == "intensity":
         return ((r + g + b) / 3).astype(np.uint8)
     total = r + g + b + 1e-10
-    if part == "s":
+    if part == "saturation":
         s = 1 - 3 * np.minimum(np.minimum(r, g), b) / total
         return (s * 255).astype(np.uint8)
     num = 0.5 * ((r - g) + (r - b))

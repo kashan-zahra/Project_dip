@@ -4,86 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>DIP Lab Basics</title>
-    <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #f4f6f8; color: #1f2933; }
-        header { background: #fff; border-bottom: 1px solid #e4e7eb; padding: 14px 24px; }
-        header h1 { margin: 0; font-size: 20px; }
-        header span { color: #7b8794; font-size: 14px; }
-        main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 20px 24px; }
-        .card { background: #fff; border: 1px solid #e4e7eb; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        .card h2 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #7b8794; }
-        .topic { font-size: 12px; color: #7b8794; margin: 10px 0 4px; }
-        .tool { display: block; width: 100%; text-align: left; padding: 8px 10px; margin-bottom: 4px;
-                border: 1px solid #e4e7eb; border-radius: 8px; background: #fff; cursor: pointer; font-size: 14px; }
-        .tool.active { background: #2563eb; color: #fff; border-color: #2563eb; }
-        .info { background: #f4f6f8; border-radius: 8px; padding: 10px; font-size: 14px; }
-        .formula { font-family: Consolas, monospace; font-size: 13px; color: #2563eb; margin-top: 6px; }
-        label { display: block; margin-top: 12px; font-size: 14px; }
-        input[type=range], select { width: 100%; margin-top: 4px; }
-        button.sample { border: 1px solid #e4e7eb; background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; }
-        .pictures { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .pictures img { width: 100%; max-height: 420px; object-fit: contain; background: #e4e7eb; border-radius: 8px; }
-        .caption { text-align: center; font-size: 13px; color: #7b8794; margin-bottom: 6px; }
-        canvas { width: 100%; height: 120px; background: #f4f6f8; border-radius: 8px; }
-        #note { margin-top: 12px; color: #1e40af; font-size: 14px; min-height: 20px; }
-        .download { display: inline-block; margin-top: 12px; background: #2563eb; color: #fff; padding: 8px 16px;
-                    border-radius: 8px; text-decoration: none; font-size: 14px; }
-        .hidden { display: none; }
-        .settings { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; align-items: start; }
-        .settings h2, .settings .info { grid-column: 1 / -1; }
-        .settings #controls { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
-        .settings #refBox { grid-column: 1 / -1; }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header>
-        <h1>DIP Lab Basics</h1>
-        <span>Our Digital Image Processing lab topics, live on any picture</span>
+        <div class="brand"><div class="dot"></div>DIP Lab Basics<small>Digital Image Processing lab topics · running on Python</small></div>
     </header>
 
-    <main>
-        <!-- ===================== left: picture, tools, settings ===================== -->
+    <main class="layout">
+        <!-- ===================== left: tools and settings ===================== -->
         <aside>
             <div class="card">
-                <h2>1. Choose a picture</h2>
-                <input type="file" id="file" accept="image/*">
-                <p style="font-size:13px;color:#7b8794;margin:10px 0 0">or a sample:
-                    <button class="sample" data-src="/static/samples/cat.jpg">Cat</button>
-                    <button class="sample" data-src="/static/samples/coffee.jpg">Coffee</button>
-                </p>
+                <p class="title">Tools</p>
+                <div class="tabs" id="tabs"></div>
+                <div class="toolgrid" id="toolGrid"></div>
             </div>
-
             <div class="card">
-                <h2>2. Choose a tool</h2>
-                <div id="toolList"></div>
-            </div>
-
-        </aside>
-
-        <!-- ===================== right: before / after + histograms ===================== -->
-        <section>
-            <div class="card settings">
-                <h2>3. Settings</h2>
-                <div class="info"><span id="info">Pick a tool.</span><div class="formula" id="formula"></div></div>
+                <p class="title">Settings</p>
+                <div class="about" id="about">Pick a tool to see what it does.</div>
                 <div id="controls"></div>
                 <div id="refBox" class="hidden">
-                    <label>Reference picture <input type="file" id="refFile" accept="image/*"></label>
+                    <label>Reference picture<input type="file" id="refFile" accept="image/*"></label>
                 </div>
             </div>
-            <div class="card">
-                <div class="pictures">
-                    <div><div class="caption">Original</div><img id="imgOriginal" alt=""></div>
-                    <div><div class="caption" id="resultCaption">Result</div><img id="imgResult" alt=""></div>
-                </div>
-                <div id="note"></div>
-                <a class="download hidden" id="download" download="result.png">Download result</a>
+        </aside>
+
+        <!-- ===================== right: pictures ===================== -->
+        <section>
+            <div class="toolbar">
+                <label class="btn">Choose picture<input type="file" id="file" accept="image/*" hidden></label>
+                <span class="samples">Sample: <button data-src="/static/samples/cat.jpg">Cat</button><button data-src="/static/samples/coffee.jpg">Coffee</button></span>
+                <a class="btn main hidden" id="download" download="result.png">Save picture</a>
             </div>
-            <div class="card">
-                <h2>Histograms (how many pixels have each gray level 0 - 255)</h2>
-                <div class="pictures">
-                    <div><div class="caption">Original</div><canvas id="histOriginal" width="400" height="120"></canvas></div>
-                    <div><div class="caption">Result</div><canvas id="histResult" width="400" height="120"></canvas></div>
+
+            <div class="stage">
+                <div class="dropzone" id="drop">
+                    <div class="big">Choose a picture to start</div>
+                    click here, or try the Cat or Coffee sample above
+                </div>
+                <div class="views hidden" id="views">
+                    <div class="pane"><div class="cap">Before</div><img id="imgOriginal" alt="Original picture"></div>
+                    <div class="pane"><div class="cap" id="resultCaption">After</div><img id="imgResult" alt="Result picture"></div>
+                </div>
+                <div class="loading" id="loading">Processing...</div>
+            </div>
+
+            <div class="note hidden" id="noteCard"><b>What happened:</b> <span id="note"></span></div>
+
+            <div class="card hist">
+                <p class="title">Histograms · how many pixels have each gray level 0 - 255</p>
+                <div class="views">
+                    <div class="pane"><div class="cap">Before</div><canvas id="histOriginal" width="512" height="130"></canvas></div>
+                    <div class="pane"><div class="cap">After</div><canvas id="histResult" width="512" height="130"></canvas></div>
                 </div>
             </div>
         </section>
@@ -93,57 +65,75 @@
         // the tool list comes from app.py (TOOLS), as [name, tool] pairs in order
         const TOOL_LIST = {{ tools | tojson }};
         const TOOLS = Object.fromEntries(TOOL_LIST);
+        const TOPICS = [...new Set(TOOL_LIST.map(([key, tool]) => tool.topic))];
+        let topic = TOPICS[0];
+        let currentTool = null;
         let picture = null;        // the chosen picture (a File)
         let reference = null;      // second picture, only for Histogram Matching
-        let currentTool = null;
         let timer = null;
         const $ = id => document.getElementById(id);
 
-        // ---------- draw the tool buttons, grouped by topic ----------
-        let lastTopic = "";
-        for (const [key, tool] of TOOL_LIST) {
-            if (tool.topic !== lastTopic) {
-                $("toolList").insertAdjacentHTML("beforeend", `<div class="topic">${tool.topic}</div>`);
-                lastTopic = tool.topic;
+        // ---------- topic tabs and tool cards ----------
+        function drawTools() {
+            $("tabs").innerHTML = "";
+            for (const t of TOPICS) {
+                const b = document.createElement("button");
+                b.className = "tab" + (t === topic ? " active" : "");
+                b.textContent = t;
+                b.onclick = () => { topic = t; drawTools(); };
+                $("tabs").appendChild(b);
             }
-            const b = document.createElement("button");
-            b.className = "tool";
-            b.textContent = tool.label;
-            b.dataset.key = key;
-            b.onclick = () => chooseTool(key);
-            $("toolList").appendChild(b);
+            $("toolGrid").innerHTML = "";
+            for (const [key, tool] of TOOL_LIST) {
+                if (tool.topic !== topic) continue;
+                const b = document.createElement("button");
+                b.className = "tool" + (key === currentTool ? " active" : "");
+                b.innerHTML = `${tool.label}<small>${tool.simple}</small>`;
+                b.onclick = () => chooseTool(key);
+                $("toolGrid").appendChild(b);
+            }
         }
 
-        // ---------- choosing a tool: show its explanation and sliders ----------
+        // ---------- choosing a tool: show its explanation and settings ----------
         function chooseTool(key) {
             currentTool = key;
             const tool = TOOLS[key];
-            document.querySelectorAll(".tool").forEach(b => b.classList.toggle("active", b.dataset.key === key));
-            $("info").textContent = tool.info;
-            $("formula").textContent = tool.formula;
-            $("resultCaption").textContent = "Result: " + tool.label;
+            drawTools();
+            $("about").innerHTML = `${tool.info}<div class="formula">${tool.formula}</div>`;
+            $("resultCaption").textContent = "After: " + tool.label;
             $("refBox").classList.toggle("hidden", !tool.needs_ref);
 
             $("controls").innerHTML = "";
             for (const c of tool.controls) {
                 const label = document.createElement("label");
-                let input;
-                if (Array.isArray(c[2])) {                  // [name, label, [choices]]  -> dropdown
-                    input = document.createElement("select");
-                    c[2].forEach(v => input.add(new Option(v, v)));
-                    label.textContent = c[1];
+                label.textContent = c[1];
+                const input = document.createElement("input");
+                input.name = c[0];
+                if (Array.isArray(c[2])) {                  // [name, label, [choices]] -> pill buttons
+                    input.type = "hidden";
+                    input.value = c[2][0];
+                    const pills = document.createElement("div");
+                    pills.className = "choice";
+                    for (const choice of c[2]) {
+                        const p = document.createElement("button");
+                        p.textContent = choice;
+                        p.className = choice === input.value ? "on" : "";
+                        p.onclick = () => {
+                            input.value = choice;
+                            pills.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === p));
+                            run();
+                        };
+                        pills.appendChild(p);
+                    }
+                    label.appendChild(pills);
                 } else {                                    // [name, label, min, max, step, default] -> slider
-                    input = document.createElement("input");
                     input.type = "range";
                     [input.min, input.max, input.step, input.value] = c.slice(2);
-                    label.textContent = `${c[1]}: `;
                     const value = document.createElement("b");
-                    value.textContent = input.value;
+                    value.textContent = " " + input.value;
                     label.appendChild(value);
-                    input.addEventListener("input", () => { value.textContent = input.value; });
+                    input.oninput = () => { value.textContent = " " + input.value; runSoon(); };
                 }
-                input.name = c[0];
-                input.addEventListener("input", runSoon);
                 label.appendChild(input);
                 $("controls").appendChild(label);
             }
@@ -162,19 +152,26 @@
             form.append("image", picture);
             form.append("tool", currentTool);
             if (reference) form.append("reference", reference);
-            $("controls").querySelectorAll("input, select").forEach(el => form.append(el.name, el.value));
+            $("controls").querySelectorAll("input").forEach(el => form.append(el.name, el.value));
 
+            $("loading").classList.add("on");
             const response = await fetch("/process", { method: "POST", body: form });
             const data = await response.json();
-            if (data.error) { $("note").textContent = data.error; return; }
+            $("loading").classList.remove("on");
+            if (data.error) { showNote(data.error); return; }
 
             $("imgOriginal").src = data.original;
             $("imgResult").src = data.result;
-            $("note").textContent = data.note;
             $("download").href = data.result;
             $("download").classList.remove("hidden");
+            showNote(data.note);
             drawHistogram($("histOriginal"), data.hist_original);
             drawHistogram($("histResult"), data.hist_result);
+        }
+
+        function showNote(text) {
+            $("note").textContent = text;
+            $("noteCard").classList.toggle("hidden", !text);
         }
 
         // ---------- draw a histogram: one bar per gray level ----------
@@ -193,15 +190,19 @@
         // ---------- choosing pictures ----------
         function setPicture(file) {
             picture = file;
-            $("imgOriginal").src = URL.createObjectURL(file);
-            if (!currentTool) chooseTool("negative"); else run();
+            $("drop").classList.add("hidden");
+            $("views").classList.remove("hidden");
+            if (!currentTool) chooseTool(TOOL_LIST[0][0]); else run();
         }
-        $("file").addEventListener("change", () => { if ($("file").files[0]) setPicture($("file").files[0]); });
-        $("refFile").addEventListener("change", () => { reference = $("refFile").files[0]; run(); });
-        document.querySelectorAll(".sample").forEach(b => b.addEventListener("click", async () => {
+        $("drop").onclick = () => $("file").click();
+        $("file").onchange = () => { if ($("file").files[0]) setPicture($("file").files[0]); };
+        $("refFile").onchange = () => { reference = $("refFile").files[0]; run(); };
+        document.querySelectorAll("[data-src]").forEach(b => b.onclick = async () => {
             const blob = await (await fetch(b.dataset.src)).blob();
             setPicture(new File([blob], "sample.jpg", { type: blob.type }));
-        }));
+        });
+
+        drawTools();
     </script>
 </body>
 </html>
