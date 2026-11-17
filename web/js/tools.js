@@ -338,27 +338,3 @@ const STAT_LABELS = [
     ["michelson", "Michelson contrast", "From 0 (flat) to 1 (full contrast)"],
     ["rms", "RMS contrast", "How spread out the brightness is. Bigger = more contrast"]
 ];
-
-// ============ FLASK VERSION: ONLY THE TOPICS FROM OUR DIP LAB ============
-// The Python/Flask version shows just the tools we did in the lab scripts.
-// (The website and the Android app keep all 35 tools.)
-// To show a hidden tool here again, add its name to this list.
-const LAB_TOOLS = [
-    "negative",                          // negate.txt
-    "brightness_contrast",               // Image Contrast.py, Image Contrast-alpha-beta.py
-    "stretch",                           // HistogramStretching.py
-    "equalize",                          // BasicHistEqualization.py, NormalizedHistEqualization.py
-    "clahe",                             // Gray-CLAHE.py
-    "crop", "resize",                    // Image Croping-2.py, ImageResize.py, InterpolationKNN.py, Image-KNN.py
-    "noise",                             // GussianNoise.py
-    "sobel", "prewitt", "roberts", "canny",   // EdgeDetection.py
-    "hsi_component", "hsi_roundtrip",    // RGB2HSI.py, HSI2RGB-2.py
-    "sample",                            // Sampling.py
-    "components",                        // Pixel Connectivity-Graph.py
-    "match",                             // ImageMatching1.py, ImageMatching2.py
-];
-if (window.IMAGE_LAB_SERVER) {
-    Object.keys(TOOLS).forEach(key => { if (!LAB_TOOLS.includes(key)) delete TOOLS[key]; });
-    const getApp = document.getElementById("getApp");      // no APK download from the Python version
-    if (getApp) getApp.style.display = "none";
-}
