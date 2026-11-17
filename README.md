@@ -112,6 +112,7 @@ one interface; only the engine underneath changes.
 ## Project structure
 
 ```
+basic-lab/           DIP Lab Basics: a small, simple Flask site with only the lab topics
 python-flask/        the Python version (Flask + OpenCV)
   app.py             serves the shared web/ interface, /process runs the tools in Python
   processing.py      all the image-processing functions (the original lab code)
