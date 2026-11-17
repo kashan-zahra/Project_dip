@@ -118,7 +118,7 @@ window.LEARN = {
   "how": "For every pixel a random number is drawn from a normal distribution with the chosen mean and standard deviation, and added to the pixel. A bigger standard deviation means stronger grain. The result is clipped to 0..255.",
   "formula": "g(x, y) = f(x, y) + n,   n ~ N(mean, std^2)",
   "uses": "Testing denoising filters, data augmentation for machine learning.",
-  "code": "import cv2\nimport numpy as np\n\n\ndef gaussian_noise(img, mean, std):\n    noise = np.random.normal(mean, std, img.shape)\n    noisy = img.astype(np.float32) + noise\n    return np.clip(noisy, 0, 255).astype(np.uint8)"
+  "code": "import cv2\nimport numpy as np\n\n\ndef gaussian_noise(img, mean, std):\n    # fixed seed: the same settings always give the same grain (no flicker while you work)\n    rng = np.random.default_rng(0)\n    noise = rng.normal(mean, std, img.shape)\n    noisy = img.astype(np.float32) + noise\n    return np.clip(noisy, 0, 255).astype(np.uint8)"
  },
  "sobel": {
   "what": "An edge detector that measures how fast brightness changes (the gradient).",

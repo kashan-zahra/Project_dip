@@ -112,7 +112,9 @@ def bilateral_filter(img, sigma):
 
 
 def gaussian_noise(img, mean, std):
-    noise = np.random.normal(mean, std, img.shape)
+    # fixed seed: the same settings always give the same grain (no flicker while you work)
+    rng = np.random.default_rng(0)
+    noise = rng.normal(mean, std, img.shape)
     noisy = img.astype(np.float32) + noise
     return np.clip(noisy, 0, 255).astype(np.uint8)
 

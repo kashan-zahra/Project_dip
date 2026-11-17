@@ -290,13 +290,16 @@ function schedule() {
 }
 
 // ============ PROCESS THE IMAGE (browser or Python engine, see engine.js) ============
+let loadingTimer = null;
 const nextFrame = () => new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
 
 async function run() {
     if (!currentImg || !engineOn) return;
     const myId = ++requestId;
-    $("loading").classList.add("on");
-    await nextFrame();                       // let "Processing..." appear first
+    // show "Processing..." only if it takes a while, so quick updates don't flash
+    clearTimeout(loadingTimer);
+    loadingTimer = setTimeout(() => { if (myId === requestId) $("loading").classList.add("on"); }, 500);
+    await nextFrame();
     if (myId !== requestId) return;          // a newer request came in, skip this one
 
     const form = {};
@@ -317,7 +320,10 @@ async function run() {
         console.error(err);
         if (myId === requestId) toast("Something went wrong with this tool: " + (err.message || err));
     } finally {
-        if (myId === requestId) $("loading").classList.remove("on");
+        if (myId === requestId) {
+            clearTimeout(loadingTimer);
+            $("loading").classList.remove("on");
+        }
     }
 }
 

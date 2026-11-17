@@ -338,3 +338,29 @@ const STAT_LABELS = [
     ["michelson", "Michelson contrast", "From 0 (flat) to 1 (full contrast)"],
     ["rms", "RMS contrast", "How spread out the brightness is. Bigger = more contrast"]
 ];
+
+// ============ DIP LAB BASICS: ONLY THE TOPICS FROM OUR LAB ============
+// basic-lab/app.py sets window.IMAGE_LAB_BASIC = true. Then only the tools we did in the
+// lab scripts are shown. (The full website, the full Flask version and the app keep all 35.)
+const LAB_TOOLS = [
+    "negative",                          // negate.txt
+    "brightness_contrast",               // Image Contrast.py, Image Contrast-alpha-beta.py
+    "stretch",                           // HistogramStretching.py
+    "equalize",                          // BasicHistEqualization.py, NormalizedHistEqualization.py
+    "clahe",                             // Gray-CLAHE.py
+    "crop", "resize",                    // Image Croping-2.py, ImageResize.py, InterpolationKNN.py, Image-KNN.py
+    "noise",                             // GussianNoise.py
+    "sobel", "prewitt", "roberts", "canny",   // EdgeDetection.py
+    "hsi_component", "hsi_roundtrip",    // RGB2HSI.py, HSI2RGB-2.py
+    "sample",                            // Sampling.py
+    "components",                        // Pixel Connectivity-Graph.py
+    "match",                             // ImageMatching1.py, ImageMatching2.py
+];
+if (window.IMAGE_LAB_BASIC) {
+    Object.keys(TOOLS).forEach(key => { if (!LAB_TOOLS.includes(key)) delete TOOLS[key]; });
+    document.title = "DIP Lab Basics";
+    const brand = document.querySelector(".brand");
+    if (brand) brand.innerHTML = '<div class="dot"></div>DIP Lab Basics<small>Digital Image Processing lab topics · running on Python</small>';
+    const getApp = document.getElementById("getApp");      // no APK download here
+    if (getApp) getApp.style.display = "none";
+}

@@ -188,13 +188,24 @@
     }
 
     // normal random numbers (Box-Muller), like np.random.normal
-    function randn() {
-        let u = 0;
-        while (u === 0) u = Math.random();
-        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * Math.random());
+    // seeded random numbers (mulberry32): the same settings always give the same grain,
+    // so the picture doesn't flicker every time it is redrawn
+    function seededRandom(seed) {
+        return () => {
+            seed = (seed + 0x6D2B79F5) | 0;
+            let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
     }
 
     function gaussianNoise(img, mean, std) {
+        const rand = seededRandom(1);
+        const randn = () => {                    // normal random numbers (Box-Muller)
+            let u = 0;
+            while (u === 0) u = rand();
+            return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+        };
         return mapPixels(img, v => clampU8(Math.trunc(v + mean + std * randn())));
     }
 
