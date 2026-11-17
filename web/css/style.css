@@ -1053,3 +1053,10 @@ td:last-child {
 .behind .bfoot, .behind .bhint { color: var(--muted); font-size: 12px; margin: 12px 0 0; }
 .flipcard.flipped .flipper { min-height: 560px; }
 .flipcard.flipped .front { visibility: hidden; transition: visibility 0s 0.3s; }
+
+/* click-to-flip, file + line numbers */
+.clickflip .front, .clickflip .back { cursor: pointer; }
+.inspecting .clickflip .front { cursor: crosshair; }
+.behind .bfile { font-size: 11px; color: var(--muted); font-family: Consolas, monospace; margin: 6px 0 -2px; }
+.behind pre.numbered .ln { display: inline-block; width: 2.6em; margin-right: 10px; padding-right: 8px; text-align: right;
+                           color: #5c6680; border-right: 1px solid #343a4d; user-select: none; }

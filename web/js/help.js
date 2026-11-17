@@ -97,6 +97,13 @@ function escapeHtml(t) {
     return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// code with its real line numbers down the side, and "file · line N" on top
+function numberedCode(code, file, start) {
+    const lines = highlightPython(code.replace(/\n+$/, "")).split("\n");
+    const rows = lines.map((l, i) => `<span class="ln">${start + i}</span>${l}`).join("\n");
+    return `<div class="bfile">&#128196; ${escapeHtml(file)} &middot; line ${start}</div><pre class="numbered"><code>${rows}</code></pre>`;
+}
+
 function renderTrace() {
     const t = lastTrace, box = $("behindBack");
     if (!t) { box.innerHTML = '<p class="bhint">Pick a tool to see what Python does.</p>'; return; }
@@ -112,19 +119,20 @@ function renderTrace() {
 
     if (t.run_tool) {
         html += `<div class="bstep"><span class="bn">2</span><code>app.py</code> → <code>run_tool()</code> reads them</div>`;
-        html += `<pre><code>${highlightPython(t.run_tool)}</code></pre>`;
+        html += numberedCode(t.run_tool, t.app_file || "app.py", t.run_tool_line || 1);
     }
     t.calls.forEach(c => {
         const sig = c.params.map(p => p.name === "img" ? "img" : `${p.name}=${escapeHtml(p.value)}`).join(", ");
         html += `<div class="bstep"><span class="bn">3</span><code>processing.py</code> runs <code class="bcall">${escapeHtml(c.name)}(${sig})</code></div>`;
         html += '<div class="bparams">' + c.params.map(p =>
             `<div><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.value)}</span></div>`).join("") + "</div>";
-        html += `<pre><code>${highlightPython(c.code)}</code></pre>`;
+        html += numberedCode(c.code, c.file || "processing.py", c.line || 1);
     });
     const e = t.example;
     html += `<div class="bstep"><span class="bn">4</span>Example: the pixel in the centre (x = ${e.x}, y = ${e.y})</div>
         <div class="bpixel"><span>${escapeHtml(e.before)}</span><b>&#8594;</b><span>${escapeHtml(e.after)}</span></div>`;
-    html += `<p class="bfoot">Took ${t.ms} ms in Python · picture ${t.size_in} → ${t.size_out}</p>`;
+    html += `<p class="bfoot">Took ${t.ms} ms in Python · picture ${t.size_in} → ${t.size_out}</p>
+        <p class="bfoot">Tip: click anywhere on this card to flip back to the picture.</p>`;
     box.innerHTML = html;
     $("behindClose").onclick = toggleBehind;
 }
@@ -140,4 +148,14 @@ function toggleBehind() {
 if (SERVER_MODE && !document.documentElement.classList.contains("app")) {
     $("behindBtn").classList.remove("hidden");
     $("behindBtn").onclick = toggleBehind;
+    $("paneAfter").classList.add("clickflip");
+
+    // click the card itself to flip it back and forth (the buttons still work too)
+    $("paneAfter").addEventListener("click", e => {
+        if (inspectOn) return;                                   // the Pixel Inspector uses clicks
+        if (!behindOn && !$("imgResult").getAttribute("src")) return;   // nothing to explain yet
+        if (e.target.closest("button, a, input")) return;
+        if (String(window.getSelection())) return;               // selecting code to copy, not flipping
+        toggleBehind();
+    });
 }

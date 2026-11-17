@@ -5,6 +5,7 @@ down every function call with its real parameter values. The page shows this on 
 the After card ("Behind the scenes").
 """
 import inspect
+import os
 import re
 import time
 
@@ -49,21 +50,22 @@ def pixel(img, x, y):
 
 
 def run_tool_lines(app_module, tool):
-    """The lines of run_tool() in app.py that handle this tool."""
-    lines = inspect.getsource(app_module.run_tool).splitlines()
+    """The lines of run_tool() in app.py that handle this tool, and the line number they start on."""
+    lines, first = inspect.getsourcelines(app_module.run_tool)
+    lines = [l.rstrip("\n") for l in lines]
     start = None
     for i, line in enumerate(lines):
         if re.match(r"\s{4}if tool (==|in) .*" + re.escape(f'"{tool}"'), line):
             start = i
             break
     if start is None:
-        return ""
+        return "", 0
     block = [lines[start]]
     for line in lines[start + 1:]:
         if re.match(r"\s{4}(if tool|# -|return )", line) or not line.strip():
             break
         block.append(line)
-    return "\n".join(l[4:] for l in block)
+    return "\n".join(l[4:] for l in block), first + start
 
 
 def run_with_trace(app_module, img, tool, form, ref):
@@ -83,7 +85,9 @@ def run_with_trace(app_module, img, tool, form, ref):
         names = list(inspect.signature(func).parameters)
         params = [{"name": n, "value": describe(a)} for n, a in zip(names, args)]
         params += [{"name": k, "value": describe(v)} for k, v in kwargs.items()]
-        calls.append({"name": name, "params": params, "code": inspect.getsource(func)})
+        code, line = inspect.getsourcelines(func)
+        calls.append({"name": name, "params": params, "code": "".join(code), "line": line,
+                      "file": os.path.basename(inspect.getsourcefile(func))})
 
     h, w = img.shape[:2]
     x, y = w // 2, h // 2                           # example pixel: the centre of the picture
@@ -95,10 +99,13 @@ def run_with_trace(app_module, img, tool, form, ref):
         example["after"] = f"(the picture is now {ow} x {oh}, so pixels moved)"
 
     settings = {k: v for k, v in form.items() if k != "tool"}
+    run_code, run_line = run_tool_lines(app_module, tool)
     trace = {
         "tool": tool,
         "settings": settings,
-        "run_tool": run_tool_lines(app_module, tool),
+        "run_tool": run_code,
+        "run_tool_line": run_line,
+        "app_file": os.path.basename(inspect.getsourcefile(app_module.run_tool)),
         "calls": calls,
         "example": example,
         "ms": round(ms, 1),
