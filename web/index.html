@@ -70,6 +70,7 @@
                     <button data-mode="after">After</button>
                 </div>
                 <div class="actions">
+                    <button class="btn hidden" id="behindBtn" title="Flip the After picture to see what Python did">&#9881; Behind the scenes</button>
                     <button class="btn" id="toggleInspect">Pixel Inspector: Off</button>
                     <button class="btn" id="newImage">New image</button>
                     <button class="btn" id="undoBtn" title="Go back one step">&#8630; Undo</button>
@@ -97,10 +98,16 @@
                         <div class="meta" id="sizeOriginal"></div>
                     </div>
                     <div class="divider"><span>&#8596;</span></div>
-                    <div class="pane" id="paneAfter">
-                        <div class="cap" id="afterCap">After</div>
-                        <img id="imgResult" alt="Result image">
-                        <div class="meta" id="sizeResult"></div>
+                    <div class="pane flipcard" id="paneAfter">
+                        <div class="flipper">
+                            <div class="front">
+                                <div class="cap" id="afterCap">After</div>
+                                <img id="imgResult" alt="Result image">
+                                <div class="meta" id="sizeResult"></div>
+                            </div>
+                            <!-- back of the card: what Python did (Flask versions only) -->
+                            <div class="back behind" id="behindBack" aria-live="polite"></div>
+                        </div>
                     </div>
                 </div>
 

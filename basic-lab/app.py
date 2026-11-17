@@ -8,12 +8,14 @@ tools we did in the lab scripts. Every picture is processed here with OpenCV (pr
     python app.py            then open http://127.0.0.1:5000
 """
 import base64
+import sys
 import os
 
 import cv2
 import numpy as np
 from flask import Flask, Response, abort, jsonify, request, send_from_directory
 
+import behind
 import processing as dip
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -233,7 +235,8 @@ def process():
     if base is None:
         base = img
 
-    out, note = run_tool(img, request.form.get("tool", "none"), request.form, ref)
+    # run the tool, and record what happens behind the scenes (see behind.py)
+    out, note, trace = behind.run_with_trace(sys.modules[__name__], img, request.form.get("tool", "none"), request.form, ref)
 
     return jsonify(
         original=encode(base),
@@ -245,6 +248,7 @@ def process():
         hist_result=dip.histogram(out),
         stats_original=dip.stats(base),
         stats_result=dip.stats(out),
+        trace=trace,
     )
 
 

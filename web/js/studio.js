@@ -339,6 +339,7 @@ function show(data) {
     $("sizeResult").textContent = data.size_result;
     $("afterCap").textContent = toolName ? "After: " + toolName : "After (pick a tool)";
     $("download").href = data.result;
+    if (data.trace) { lastTrace = data.trace; if (behindOn) renderTrace(); }
     if (!$("learn").classList.contains("hidden")) {
         $("lBefore").src = data.original;
         $("lAfter").src = data.result;
